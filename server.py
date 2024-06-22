@@ -1401,7 +1401,7 @@ def synonyms():
         synonym_list_str = ';'.join([str(syn) for syn in synonym_list])
         synonym_list_str +=';' + node
         case = 1
-        return render_template('genenames.html', case = case, gene = node.upper(,version=version()), synonym_list = synonym_list, synonym_list_str=synonym_list_str)
+        return render_template('genenames.html', case = case, gene = node.upper(), version=version(), synonym_list = synonym_list, synonym_list_str=synonym_list_str)
     except:
         try:
             synonym_list = session['synonym_list']
