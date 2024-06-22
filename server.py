@@ -1,4 +1,7 @@
 #!/bin/env  python3
+#
+# This is the main flask server
+
 from __future__ import print_function
 
 import hashlib
@@ -50,6 +53,14 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///'+datadir+'userspub.sqlite'
 db = SQLAlchemy(app)
 nltk.data.path.append("./nlp/")
 
+VERSION=None
+
+def version():
+    if not VERSION:
+        with open("VERSION", 'r') as file:
+            VERSION = file.read()
+    return VERSION
+
 # Sqlite database
 class users(db.Model):
     __tablename__='user'
@@ -63,8 +74,8 @@ class users(db.Model):
 def clean_doc(doc, vocab):
     doc = doc.lower()
     tokens = doc.split()
-    re_punc = re.compile('[%s]' % re.escape(string.punctuation))    
-    tokens = [re_punc.sub('' , w) for w in tokens]    
+    re_punc = re.compile('[%s]' % re.escape(string.punctuation))
+    tokens = [re_punc.sub('' , w) for w in tokens]
     tokens = [word for word in tokens if len(word) > 1]
     stop_words = set(stopwords.words('english'))
     tokens = [w for w in tokens if not w in stop_words]
@@ -109,7 +120,7 @@ def root():
         ontoarchive()
         onto_len_dir = session['onto_len_dir']
         onto_list = session['onto_list']
-    else: 
+    else:
         onto_len_dir = 0
         onto_list = ''
 
@@ -161,13 +172,13 @@ def signup():
 
         if (found_user and (bcrypt.checkpw(password.encode('utf8'), found_user.password)==False)):
             flash("Already registered, but wrong password!", "inval")
-            return render_template('signup.html',onto_len_dir=onto_len_dir, onto_list=onto_list, ontol = 'addiction', dict_onto = dict_onto)  
+            return render_template('signup.html',onto_len_dir=onto_len_dir, onto_list=onto_list, ontol = 'addiction', dict_onto = dict_onto)
 
         session['email'] = email
         session['hashed_email'] = hashlib.md5(session['email'] .encode('utf-8')).hexdigest()
         session['name'] = name
         password = bcrypt.hashpw(password.encode('utf8'), bcrypt.gensalt())
-        user = users(name=name, email=email, password = password)       
+        user = users(name=name, email=email, password = password)
         if found_user:
             session['email'] = found_user.email
             session['hashed_email'] = hashlib.md5(session['email'] .encode('utf-8')).hexdigest()
@@ -219,10 +230,10 @@ def signin():
             return render_template('index.html', onto_len_dir=onto_len_dir, onto_list=onto_list, ontol = 'addiction', dict_onto = dict_onto)
         else:
             flash("Invalid username or password!", "inval")
-            return render_template('signup.html')   
+            return render_template('signup.html')
     return render_template('signin.html')
 
-# change password 
+# change password
 @app.route("/<nm_passwd>", methods=["POST", "GET"])
 def profile(nm_passwd):
     try:
@@ -259,7 +270,7 @@ def profile(nm_passwd):
                 return render_template("/passwd_change.html", name=user_name)
             else:
                 return "This url does not exist"
-        else: 
+        else:
             return "This url does not exist"
     except (AttributeError):
         return "This url does not exist"
@@ -276,7 +287,7 @@ def logout():
         global user1
         if session['name'] != '':
             user1 = session['name']
-        else: 
+        else:
             user1 = session['email']
     flash("You have been logged out, {user1}", "inval")
     session.pop('email', None)
@@ -286,8 +297,7 @@ def logout():
 
 @app.route("/about")
 def about():
-    return render_template('about.html')
-
+    return render_template('about.html',version=version())
 
 # Ontology selection
 @app.route("/index_ontology", methods=["POST", "GET"])
@@ -376,7 +386,7 @@ def ontology():
         keycat = keycat.replace('| ', '|')
         namecat=re.sub('[^,a-zA-Z0-9 \n]', '', namecat)
 
-        # Generate a unique session ID depending on timestamp to track the results 
+        # Generate a unique session ID depending on timestamp to track the results
         timestamp = datetime.utcnow().replace(microsecond=0)
         timestamp = timestamp.replace(tzinfo=pytz.utc)
         timestamp = timestamp.astimezone(pytz.timezone("America/Chicago"))
@@ -409,8 +419,8 @@ def ontology():
                         with open("addiction.onto","r") as f1:
                             with open(session['namecat']+".onto", "w") as f2:
                                 for line in f1:
-                                    f2.write(line)  
-                    else: 
+                                    f2.write(line)
+                    else:
                         f= open(session['namecat']+".onto","w")
                         dict_onto={}
                 else:
@@ -425,8 +435,8 @@ def ontology():
                 flag_kw=0
                 if (',' in maincat) or (',' in subcat):
                     flash("Only one word can be added to the category and subcategory at a time.","inval")
-                elif maincat in dict_onto.keys():  # Layer 2, main category 
-                    if subcat in dict_onto[maincat].keys():  # Layer 3, keywords shown in results 
+                elif maincat in dict_onto.keys():  # Layer 2, main category
+                    if subcat in dict_onto[maincat].keys():  # Layer 3, keywords shown in results
                         keycat_ls = keycat.split('|')
                         for kw in str.split(next(iter(dict_onto[maincat][subcat])), '|'):  # Layer 4, synonyms
                             for keycat_word in keycat_ls:
@@ -462,7 +472,7 @@ def ontology():
                     flash("You must login to change the addiction ontology.")
                 else:
                     flash("You must login to create a new ontology.")
-        
+
         if request.form['submit'] == 'remove':
             if ('email' in session):
                 session['namecat']=namecat
@@ -485,8 +495,8 @@ def ontology():
                         with open("addiction.onto","r") as f1:
                             with open(session['namecat']+".onto", "w") as f2:
                                 for line in f1:
-                                    f2.write(line)  
-                    else: 
+                                    f2.write(line)
+                    else:
                         f= open(session['namecat']+".onto","w")
                         dict_onto={}
 
@@ -498,10 +508,10 @@ def ontology():
                     dict_onto={}
                 else:
                     dict_onto=ast.literal_eval(onto_cont)
-                
+
                 flag_kw=0
-                if maincat in dict_onto.keys():  # Layer 2, main category 
-                    if subcat in dict_onto[maincat].keys():  # Layer 3, keywords shown in results 
+                if maincat in dict_onto.keys():  # Layer 2, main category
+                    if subcat in dict_onto[maincat].keys():  # Layer 3, keywords shown in results
                         for kw in str.split(next(iter(dict_onto[maincat][subcat])), '|'):
                             keycat_ls = keycat.split('|')
                             for keycat_word in keycat_ls:  # Layer 4, synonyms
@@ -516,11 +526,11 @@ def ontology():
                             dict_onto[maincat]=re.sub(r'\''+subcat+'\': \'{}\', ', '', str(dict_onto[maincat]))
                             dict_onto[maincat]=re.sub(r'\''+subcat+'\': \'{}\'', '', str(dict_onto[maincat]))
                         if '{}' in dict_onto[maincat]:
-                            dict_onto=re.sub(r', \''+maincat+'\': \'{}\'', '', str(dict_onto))                    
+                            dict_onto=re.sub(r', \''+maincat+'\': \'{}\'', '', str(dict_onto))
                         dict_onto=str(dict_onto).replace('\"{','{')
                         dict_onto=str(dict_onto).replace('}\"','}')
                         dict_onto=str(dict_onto).replace('\'{','{')
-                        dict_onto=str(dict_onto).replace('}\'','}')                   
+                        dict_onto=str(dict_onto).replace('}\'','}')
                         with open(session['namecat']+'.onto', 'w') as file3:
                             file3.write(str(dict_onto))
                         if flag_kw==0:
@@ -528,12 +538,12 @@ def ontology():
                     else:
                         flash("\""+subcat+"\" is not a subcategory.","inval")
                 else:
-                    flash("\""+subcat+"\" is not a category.","inval")  
+                    flash("\""+subcat+"\" is not a category.","inval")
             else:
                 if namecat=='addiction':
                     flash("You must login to change the addiction ontology.")
                 else:
-                    flash("You must login to create a new ontology.")         
+                    flash("You must login to create a new ontology.")
 
     if 'namecat' in session:
         file2 = open(session['namecat']+".onto","r")
@@ -570,7 +580,7 @@ def ontoarchive():
             onto_list = ''
             onto_cont=open("addiction.onto","r").read()
             dict_onto=ast.literal_eval(onto_cont)
-            return render_template('index.html',onto_len_dir=onto_len_dir, onto_list=onto_list, ontol = 'addiction', dict_onto = dict_onto) 
+            return render_template('index.html',onto_len_dir=onto_len_dir, onto_list=onto_list, ontol = 'addiction', dict_onto = dict_onto)
         else:
             session['user_folder'] = datadir+"/user/"+str(session['hashed_email'])
     else:
@@ -584,10 +594,10 @@ def ontoarchive():
     session_id=session['id']
     def sorted_alphanumeric(data):
         convert = lambda text: int(text) if text.isdigit() else text.lower()
-        alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ] 
+        alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ]
         return sorted(data, key=alphanum_key)
 
-    dirlist = sorted_alphanumeric(os.listdir(session['user_folder']+"/ontology/"))  
+    dirlist = sorted_alphanumeric(os.listdir(session['user_folder']+"/ontology/"))
     onto_folder_list = []
     onto_directory_list = []
     onto_list=[]
@@ -645,26 +655,26 @@ def progress():
         if ('email' in session):
             onto_len_dir = session['onto_len_dir']
             onto_list = session['onto_list']
-        else: 
+        else:
             onto_len_dir = 0
             onto_list = ''
         onto_cont=open("addiction.onto","r").read()
         dict_onto=ast.literal_eval(onto_cont)
         message="<span class='text-danger'>Up to 200 terms can be searched at a time</span>"
         return render_template('index.html' ,onto_len_dir=onto_len_dir, onto_list=onto_list, ontol = 'addiction', dict_onto = dict_onto, message=message)
-    
+
     if len(genes)==0:
         if ('email' in session):
             onto_len_dir = session['onto_len_dir']
             onto_list = session['onto_list']
-        else: 
+        else:
             onto_len_dir = 0
             onto_list = ''
         onto_cont=open("addiction.onto","r").read()
         dict_onto=ast.literal_eval(onto_cont)
         message="<span class='text-danger'>Please enter a search term </span>"
         return render_template('index.html',onto_len_dir=onto_len_dir, onto_list=onto_list, ontol = 'addiction', dict_onto = dict_onto, message=message)
-    
+
     tf_path=tempfile.gettempdir()
     genes_for_folder_name =""
     if len(genes) == 1:
@@ -680,7 +690,7 @@ def progress():
         genes_for_folder_name =str(genes[0])+"_"+str(genes[1])+"_"+str(genes[2])
         marker="_m"
 
-    # Generate a unique session ID depending on timestamp to track the results 
+    # Generate a unique session ID depending on timestamp to track the results
     timestamp = datetime.utcnow().replace(microsecond=0)
     timestamp = timestamp.replace(tzinfo=pytz.utc)
     timestamp = timestamp.astimezone(pytz.timezone("America/Chicago"))
@@ -737,7 +747,7 @@ def progress():
         session['rnd'] = timeextension+"_0_"+genes_for_folder_name+marker+"_0_"+onto_name_archive
         rnd = session['rnd']
     else:
-        rnd = "tmp" + ''.join(random.choice(string.ascii_letters) for x in range(6)) 
+        rnd = "tmp" + ''.join(random.choice(string.ascii_letters) for x in range(6))
         session['path']=tf_path+ "/" + rnd
         os.makedirs(session['path'])
         search_type = request.args.getlist('type')
@@ -778,7 +788,7 @@ def search():
     search_type = session['search_type']
     temp_nodes = ""
     json_nodes = "{\"data\":["
-    
+
     n_num=0
     d={}
     nodecolor={}
@@ -817,7 +827,7 @@ def search():
                     nodes_list.append(nd)
                 json_nodes += generate_nodes_json(dictionary[ky],str(ky),nodecolor[ky])
         d["nj{0}".format(n_num)]=''
-    
+
     json_nodes = json_nodes[:-2]
     json_nodes =json_nodes+"]}"
     def generate(genes, tf_name):
@@ -828,7 +838,7 @@ def search():
             progress=0
             searchCnt=0
             nodesToHide=str()
-            json_edges = str()           
+            json_edges = str()
             #genes_or = ' [tiab] or '.join(genes)
             all_d=''
 
@@ -864,7 +874,7 @@ def search():
                         sent_tok = pmid + ' ' + sent_tok
                         sentences_ls.append(sent_tok)
                 gene=gene.replace("-"," ")
-                
+
                 geneEdges = ""
 
                 if namecat_flag==1:
@@ -890,7 +900,7 @@ def search():
                             if namecat_flag==1:
                                 onto_cont = open(ses_namecat+".onto","r").read()
                                 dict_onto=ast.literal_eval(onto_cont)
-                                #ky_d=undic(list(dict_onto[ky].values()))    
+                                #ky_d=undic(list(dict_onto[ky].values()))
                                 sent=gene_category(gene,ky,str(ky), sentences_ls, addiction_flag,dict_onto)
                             else:
                                 #ky_d=undic(list(dict_onto[ky].values()))
@@ -898,9 +908,9 @@ def search():
                                 sent=gene_category(gene,ky,str(ky), sentences_ls, addiction_flag,dict_onto)
                                 #print(sent)
                             yield "data:"+str(progress)+"\n\n"
-                            
+
                             geneEdges += generate_edges(sent, tf_name)
-                            json_edges += generate_edges_json(sent, tf_name)                
+                            json_edges += generate_edges_json(sent, tf_name)
                         sentences+=sent
                 if ("GWAS" in search_type):
                     gwas_sent=[]
@@ -909,7 +919,7 @@ def search():
                                     | (datf["REPORTED GENE(S)"].str.contains('(?:\s|^)'+gene+'(?:\s|$)', flags=re.IGNORECASE))]
                     print (datf_sub1)
                     for nd2 in dict_onto['GWAS'].keys():
-                        for nd1 in dict_onto['GWAS'][nd2]:    
+                        for nd1 in dict_onto['GWAS'][nd2]:
                             for nd in nd1.split('|'):
                                 gwas_text=''
                                 datf_sub = datf_sub1[datf_sub1['DISEASE/TRAIT'].str.contains('(?:\s|^)'+nd+'(?:\s|$)', flags=re.IGNORECASE)]
@@ -925,11 +935,11 @@ def search():
                     with open(path_user+"gwas_results.tab", "a") as gwas_edges:
                         gwas_edges.write(sn_file)
                     geneEdges += cys
-                    json_edges += gwas_json  
+                    json_edges += gwas_json
                 # report progress immediately
                 progress+=percent
                 yield "data:"+str(progress)+"\n\n"
-                                    
+
                 if len(geneEdges) >0:
                     edges+=geneEdges
                     nodes+="{ data: { id: '" + gene +  "', nodecolor:'#E74C3C', fontweight:700, url:'/synonyms?node="+gene+"'} },\n"
@@ -941,7 +951,7 @@ def search():
                     progress=100
                     sntdata.write(sentences)
                     sntdata.close()
-                    cysdata.write(nodes+edges)               
+                    cysdata.write(nodes+edges)
                     cysdata.close()
                     zeroLinkNode.write(nodesToHide)
                     zeroLinkNode.close()
@@ -954,7 +964,7 @@ def search():
 
             # Write edges to txt file in json format also in user folder
             with open(path_user+"edges.json", "w") as temp_file_edges:
-                temp_file_edges.write(json_edges) 
+                temp_file_edges.write(json_edges)
     with open(path_user+"nodes.json", "w") as temp_file_nodes:
         temp_file_nodes.write(json_nodes)
     return Response(generate(genes, snt_file), mimetype='text/event-stream')
@@ -987,7 +997,7 @@ def tableview():
         for line in file_edges.readlines():
             if ':' not in line:
                 nodata_temp = 1
-            else: 
+            else:
                 nodata_temp = 0
                 with open(datadir+gene_url_tmp +"/edges.json") as edgesjsonfile:
                     jedges = json.load(edgesjsonfile)
@@ -1010,7 +1020,7 @@ def tableview():
         for line in file_edges.readlines():
             if ':' not in line:
                 nodata_temp = 1
-            else: 
+            else:
                 nodata_temp = 0
                 with open(gene_url_tmp +"/edges.json") as edgesjsonfile:
                     jedges = json.load(edgesjsonfile)
@@ -1058,7 +1068,7 @@ def tableview0():
         for line in file_edges.readlines():
             if ':' not in line:
                 nodata_temp = 1
-            else: 
+            else:
                 nodata_temp = 0
                 with open(datadir+gene_url_tmp+"/edges.json") as edgesjsonfile:
                     jedges = json.load(edgesjsonfile)
@@ -1082,7 +1092,7 @@ def tableview0():
         for line in file_edges.readlines():
             if ':' not in line:
                 nodata_temp = 1
-            else: 
+            else:
                 nodata_temp = 0
                 with open(gene_url_tmp+"/edges.json") as edgesjsonfile:
                     jedges = json.load(edgesjsonfile)
@@ -1129,9 +1139,9 @@ def userarchive():
     session_id=session['id']
     def sorted_alphanumeric(data):
         convert = lambda text: int(text) if text.isdigit() else text.lower()
-        alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ] 
+        alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ]
         return sorted(data, key=alphanum_key)
-    dirlist = sorted_alphanumeric(os.listdir(session['user_folder']))  
+    dirlist = sorted_alphanumeric(os.listdir(session['user_folder']))
     folder_list = []
     directory_list = []
     gene_list=[]
@@ -1243,7 +1253,7 @@ def cytoscape():
     genes_session_tmp=tf_path + "/" + genes_url
     rnd_url_tmp=tf_path +"/" + rnd_url
     message2="<ul><li><font color=\"#E74C3C\">Click on a line to read the sentences </font> <li>Click on a keyword to see the terms included in the search<li>Hover a pointer over a node to hide other links <li>Move the nodes around to adjust visibility <li> Reload the page to restore the default layout<li>View the results in <a href='\\tableview/?rnd={}&genequery={}'\ ><b>a table. </b></a></ul>".format(rnd_url,genes_url)
-    
+
     if ('email' in session):
         filename = rnd_url.split("_0_")[0]
         rnd_url_tmp = datadir+"/user/"+str(session['hashed_email'])+"/"+rnd_url+"/"+filename
@@ -1293,7 +1303,7 @@ def sentences():
         line = ' '.join(tokens)
         line = [line]
         tokenized_sent = tokenizer.texts_to_sequences(line)
-        tokenized_sent = pad_sequences(tokenized_sent, maxlen=max_length, padding='post') 
+        tokenized_sent = pad_sequences(tokenized_sent, maxlen=max_length, padding='post')
         predict_sent = model.predict(tokenized_sent, verbose=0)
         percent_sent = predict_sent[0,0]
         if round(percent_sent) == 0:
@@ -1329,10 +1339,10 @@ def sentences():
                 if(cat0=='stress'):
                     out4 = predict_sent(text)
                     if(out4 == 'pos'):
-                        out_pred_pos = "<li> "+ text + " <a href=\"https://www.ncbi.nlm.nih.gov/pubmed/?term=" + pmid +"\" target=_new>PMID:"+pmid+"<br></a>"                    
+                        out_pred_pos = "<li> "+ text + " <a href=\"https://www.ncbi.nlm.nih.gov/pubmed/?term=" + pmid +"\" target=_new>PMID:"+pmid+"<br></a>"
                         out_pos += out_pred_pos
                     else:
-                        out_pred_neg = "<li>"+ text + " <a href=\"https://www.ncbi.nlm.nih.gov/pubmed/?term=" + pmid +"\" target=_new>PMID:"+pmid+"<br></a>"                    
+                        out_pred_neg = "<li>"+ text + " <a href=\"https://www.ncbi.nlm.nih.gov/pubmed/?term=" + pmid +"\" target=_new>PMID:"+pmid+"<br></a>"
                         out_neg += out_pred_neg
     out1="<h3>"+gene0 + " and " + cat0  + "</h3>\n"
     if len(pmid_list)>1:
@@ -1383,18 +1393,18 @@ def synonyms():
     node=node.upper()
     allnodes={**genes}
     try:
-        synonym_list = list(allnodes[node].split("|")) 
+        synonym_list = list(allnodes[node].split("|"))
         session['synonym_list'] = synonym_list
         session['main_gene'] = node.upper()
         out="<hr><li>"+ allnodes[node].replace("|", "<li>")
-        synonym_list_str = ';'.join([str(syn) for syn in synonym_list]) 
+        synonym_list_str = ';'.join([str(syn) for syn in synonym_list])
         synonym_list_str +=';' + node
         case = 1
         return render_template('genenames.html', case = case, gene = node.upper(), synonym_list = synonym_list, synonym_list_str=synonym_list_str)
     except:
         try:
             synonym_list = session['synonym_list']
-            synonym_list_str = ';'.join([str(syn) for syn in synonym_list]) 
+            synonym_list_str = ';'.join([str(syn) for syn in synonym_list])
             synonym_list_str +=';' + node
             case = 1
             return render_template('genenames.html', case=case, gene = session['main_gene'] , synonym_list = synonym_list, synonym_list_str=synonym_list_str)
@@ -1443,7 +1453,7 @@ def gene_gene():
             pmid = tiab.pop(0)
             tiab= " ".join(tiab)
             sentences = sent_tokenize(tiab)
-            ## keep the sentence only if it contains the gene 
+            ## keep the sentence only if it contains the gene
             for sent in sentences:
                 if findWholeWord(query)(sent):
                     sent=re.sub(r'\b(%s)\b' % query, r'<strong>\1</strong>', sent, flags=re.I)
@@ -1472,7 +1482,7 @@ def gene_gene():
                 sentword="sentences"
             topGeneHits[ "<li> <a href=/sentences?edgeID=" + url+ " target=_new>" + "Show " + str(hitGenes[key]) + " " + sentword +" </a> about "+query+" and <a href=/showTopGene?topGene="+key+" target=_gene><span style=\"background-color:#FcF3cf\">"+key+"</span></a>" ]=hitGenes[key]
         topSorted = [(k, topGeneHits[k]) for k in sorted(topGeneHits, key=topGeneHits.get, reverse=True)]
-        
+
         for k,v in topSorted:
             results+=k
         saveResult=open(result_file, "w+")
@@ -1480,7 +1490,7 @@ def gene_gene():
         saveResult.close()
         progress=100
         yield "data:"+str(progress)+"\n\n"
-    
+
     # Start the run
     query=session['forTopGene']
     return Response(generate(query), mimetype='text/event-stream')
