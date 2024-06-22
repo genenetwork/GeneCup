@@ -56,7 +56,7 @@ nltk.data.path.append("./nlp/")
 VERSION=None
 
 def version():
-    if not VERSION:
+    if VERSION is None:
         with open("VERSION", 'r') as file:
             VERSION = file.read()
     return VERSION
