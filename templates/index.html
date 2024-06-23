@@ -6,24 +6,23 @@
 
 <div class="row">
 	<div class="col-md-9">
-		<p>GeneCup is a tool to efficiently and comprehensively answer the question <b>"What do we know about these genes and the topic I study?".  
+		<p>GeneCup is a tool to answer the question <b>"What do we know about these genes and the topic I study?".  
 		</b> GeneCup answers this question by searching PubMed to find <i>sentences</i> containing gene symbols and a custom list of keywords. 
-		These keywords are organized into a user defined ontology, which groups related keywords together for better organization of the results.  
+		<!-- These keywords are organized into a user defined ontology, which groups related keywords together for better organization of the results. -->
 		Human GWAS findings from <a href="https://www.ebi.ac.uk/gwas/">NHGRI-EBI GWAS catalog </a>are also included in the search.
-		These gene-keyword relationships are presented as an interactive graph and a table. 
+		These gene-keyword relationships are presented as a graph or a table. 
 		<!--Gene alias often include non-specific words and are thus not included in the initial search. 
 			However, a list of alias can be found by clicking on the gene symbol in the results section. 
 			These alias then can be searched with a single click. --> 
-		As an example, we present a curated ontology for drug addiction with over <a href="/ontology"> 300 keywords organized into seven categories.</a> 
-		Furthermore, <b>deep learning </b> is used to distinguish automatically the sentences describing systemic stress from those describing cellular stress. 
-		A user account (free) is needed to create custom ontologies and save the search results.
+		Here we present a curated ontology for drug addiction with over <a href="/ontology"> 300 keywords organized into seven categories.</a> 
+		<b>Deep learning </b> is used to distinguish, for example, the sentences describing systemic stress from those describing cellular stress. 
+		A user account (free) is needed to create custom ontologies and save the search results. We do not track you.
 		</p>
 
 		<p>Example: </b><a href=/progress?type=GWAS&type=addiction&type=drug&type=brain&type=stress&type=psychiatric&type=cell&type=function&query=Rgma+Penk>Rgma Penk</a>.</p>
 		
 		{%if ("name" not in session) %}
 			By default, the <a href="/ontology">addiction</a> ontology is used. Custom ontologies can be created in user accounts. 
-			Please choose keyword categories to be included in the search. 
 
 			<form action="/progress">
 				<div id="check_selection"></div>
