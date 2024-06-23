@@ -72,3 +72,36 @@ a:active {
 ul {
   margin-left:40px;
 }
+
+.main { 
+  flex: 1;
+  padding: 30px 0;
+}
+
+body 
+{
+  display: flex;
+  min-height: 80vh;
+  flex-direction: column;
+  padding-bottom: 40px;
+}
+
+footer {
+     color: white;
+     font-size: small;
+     padding: 3px 0;
+     position: absolute;
+     left: 0;
+     bottom: 0;
+     width: 100%;
+}
+
+.footer a {
+     color: yellow; 
+     text-decoration: none;
+     transition: color 0.3s ease;
+}
+
+.footer a:hover {
+     color: #adb5bd;
+}

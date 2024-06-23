@@ -24,7 +24,8 @@ from flask import (Flask, Response, flash, jsonify, redirect, render_template,
 from flask_sqlalchemy import SQLAlchemy
 from numpy import array
 
-nltk.download('punkt')
+# nltk.download('punkt') -- let's not just download data
+
 import pickle
 from collections import Counter
 from datetime import datetime
