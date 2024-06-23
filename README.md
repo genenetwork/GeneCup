@@ -36,6 +36,14 @@ The main genecup.org service is deployed deterministically (and self contained) 
 
 The source code and data are in a git repository: https://git.genenetwork.org/genecup/
 
+Unpack minipubmed and punkt (see below). And run, for example, using GNU Guix:
+
+```sh
+guix shell -C -N -F python python-flask coreutils-minimal python-bcrypt python-nltk python-numpy python-pandas python-regex python-flask-sqlalchemy edirect inetutils python-keras tensorflow sed -- env EDIRECT_PUBMED_MASTER=minipubmed/ NLTK_DATA=`pwd`/minipubmed ./server.py
+```
+
+and the service should be listening on port 4200.
+
 ## Mini PubMed for testing
 
 For testing or code development, it is useful to have a small collection of PubMed abstracts in the same format as the local PubMed mirror. We provide 2473 abstracts that can be used to test four gene symbols (gria1, crhr1, drd2, and penk).
@@ -49,17 +57,29 @@ cat pmid.list |fetch-PubMed  -path PubMed/Archive/ >test.xml
 ```
 You should see 2473 abstracts in the test.xml file.
 
+## NLTK tokens
+
+You also need to fetch punkt.zip from https://www.nltk.org/nltk_data/
+
+```sh
+cd minipubmed
+mkdir tokenizers
+cd tokenizers
+wget https://raw.githubusercontent.com/nltk/nltk_data/gh-pages/packages/tokenizers/punkt.zip
+unzip punkt.zip
+```
+
 ## Source code
 
 https://git.genenetwork.org/genecup/
 
 ## Support
 
-E-mail Pjotr Prins or Hao Chen.
+E-mail [Pjotr Prins](https://thebird.nl) or [Hao Chen](https://www.uthsc.edu/neuroscience-institute/about/faculty/chen.php).
 
 ## License
 
-GeneCup source code is published under the liberal MIT licence (aka expat license)
+GeneCup source code is published under the liberal free software MIT licence (aka expat license)
 
 ## Cite
 
