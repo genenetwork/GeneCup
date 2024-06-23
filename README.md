@@ -48,3 +48,34 @@ cd minipubmed
 cat pmid.list |fetch-PubMed  -path PubMed/Archive/ >test.xml
 ```
 You should see 2473 abstracts in the test.xml file.
+
+## Source code
+
+https://git.genenetwork.org/genecup/
+
+## Support
+
+E-mail Pjotr Prins or Hao Chen.
+
+## License
+
+GeneCup source code is published under the liberal MIT licence (aka expat license)
+
+## Cite
+
+[GeneCup: mining PubMed and GWAS catalog for gene-keyword relationships](https://academic.oup.com/g3journal/article/12/5/jkac059/6548160) by
+Gunturkun MH, Flashner E, Wang T, Mulligan MK, Williams RW, Prins P, and Chen H.
+
+G3 (Bethesda). 2022 May 6;12(5):jkac059. doi: 10.1093/g3journal/jkac059. PMID: 35285473; PMCID: PMC9073678.
+
+```
+@article{GeneCup,
+  pmid         = {35285473},
+  author       = {Gunturkun, M. H. and Flashner, E. and Wang, T. and Mulligan, M. K. and Williams, R. W. and Prins, P. and Chen, H.},
+  title        = {{GeneCup: mining PubMed and GWAS catalog for gene-keyword relationships}},
+  journal      = {G3 (Bethesda)},
+  year         = {2022},
+  doi          = {10.1093/g3journal/jkac059},
+  url          = {http://www.ncbi.nlm.nih.gov/pubmed/35285473}
+}
+```
