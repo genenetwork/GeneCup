@@ -568,7 +568,7 @@ def ontology():
     else:
         onto_len_dir=0
         onto_list=''
-    return render_template('ontology.html',dict_onto=dict_onto, namecat=name_to_html, onto_len_dir=onto_len_dir, onto_list=onto_list,version=version())
+    return render_template('ontology.html',no_footer=True, dict_onto=dict_onto, namecat=name_to_html, onto_len_dir=onto_len_dir, onto_list=onto_list,version=version())
 
 
 @app.route("/ontoarchive")
@@ -1040,7 +1040,7 @@ def tableview():
     num_gene = gene_name.count(',')+1
 
     message3="<ul><li> <font color=\"#E74C3C\">Click on the abstract count to read sentences linking the keyword and the gene</font>  <li> Click on a keyword to see the terms included in the search. <li>View the results in <a href='\\cytoscape/?rnd={}&genequery={}'\ ><b> a graph.</b></a> </ul> Links will be preserved when the table is copy-n-pasted into a spreadsheet.".format(rnd_url,genes_url)
-    return render_template('tableview.html', genes_session_tmp = genes_session_tmp, nodata_temp=nodata_temp, num_gene=num_gene, jedges=jedges, jnodes=jnodes,gene_name=gene_name, message3=message3, rnd_url=rnd_url, genes_url=genes_url,version=version())
+    return render_template('tableview.html', no_footer=True, genes_session_tmp = genes_session_tmp, nodata_temp=nodata_temp, num_gene=num_gene, jedges=jedges, jnodes=jnodes,gene_name=gene_name, message3=message3, rnd_url=rnd_url, genes_url=genes_url,version=version())
 
 
 # Table for the zero abstract counts
@@ -1360,7 +1360,7 @@ def sentences():
     elif(out_neg != "" and out_pos == ""):
         out = out1 +out2+stress_cellular+out_neg
     K.clear_session()
-    return render_template('sentences.html', sentences="<ol>"+out+"</ol><p>",version=version())
+    return render_template('sentences.html', no_footer=True, sentences="<ol>"+out+"</ol><p>",version=version())
 
 
 # Show the cytoscape graph for one gene from the top gene list
@@ -1508,7 +1508,7 @@ def showGeneTopGene ():
 # Generate a page that lists all the top 150 addiction genes with links to cytoscape graph.
 @app.route("/allTopGenes")
 def top150genes():
-    return render_template("topAddictionGene.html",version=version())
+    return render_template("topAddictionGene.html",no_footer=True,version=version())
 
 
 if __name__ == '__main__':
