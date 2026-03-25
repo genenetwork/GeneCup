@@ -9,18 +9,18 @@ Organism:
 Phenotype:
 Candidate Gene: {{gene}}
 
-Goal: To critically evaluate [Candidate Gene] as a plausible causal gene for the [Phenotype] by analyzing the literature excerpts provided at the end of this prompt with appropriate scientific caution.
+Goal: To critically evaluate {{gene}} as a plausible causal gene for the [Phenotype] by analyzing the literature excerpts provided at the end of this prompt with appropriate scientific caution.
 
 2. Required Analysis:
 Please perform the following four-step analysis based on the Source Information provided at the end. Your evaluation must be rigorous and avoid overstating claims. Acknowledge the limitations of interpreting isolated sentences and prioritize a nuanced perspective.
 
 A. Term Disambiguation
 
-For each sentence provided in the "Source Information" section, confirm if the term "[Candidate Gene]" unambiguously refers to the intended gene. If the term is used ambiguously or refers to another scientific concept, state this and exclude the sentence from further analysis. Proceed only with the confirmed sentences.
+For each sentence provided in the "Source Information" section, confirm if the term "{{gene}}" unambiguously refers to the intended gene. If the term is used ambiguously or refers to another scientific concept, state this and exclude the sentence from further analysis. Proceed only with the confirmed sentences.
 
 B. Synthesis of Function and Experimental Context
 
-From the sentences confirmed in Step A, synthesize the known biological functions of [Candidate Gene]. Do not create a single, flattened narrative. Instead, structure your summary to reflect the nuance of the findings:
+From the sentences confirmed in Step A, synthesize the known biological functions of {{gene}}. Do not create a single, flattened narrative. Instead, structure your summary to reflect the nuance of the findings:
 Characterize Each Function: For each reported function, describe what the gene does.
 Note the Experimental System: Specify the context for each finding. Was it observed in vivo (e.g., in a mouse model), in vitro (e.g., in a specific cell line like HEK293), or is it a finding from a computational prediction? (Cite PMID/ID).
 Distinguish Strength of Claims: Differentiate between established, speculative, or indirect roles. For example, note if the source text uses cautious language like "may regulate," "is associated with," or "is thought to be involved in." (Cite PMID/ID).
@@ -28,7 +28,7 @@ Acknowledge Inconsistencies: If any sentences suggest conflicting or different r
 
 C. Critical Evaluation of Causal Gene Plausibility (with In-text Citations)
 
-Construct a detailed scientific evaluation of [Candidate Gene]'s plausibility for [Phenotype]. Your argument must be built cautiously, explicitly weighing the evidence for and against the gene's candidacy. Every claim you make must be immediately followed by its source (PMID/ID).
+Construct a detailed scientific evaluation of {{gene}}'s plausibility for [Phenotype]. Your argument must be built cautiously, explicitly weighing the evidence for and against the gene's candidacy. Every claim you make must be immediately followed by its source (PMID/ID).
 
 Start with an Initial Caveat that acknowledges the inherent limitations of this analysis, such as the small number of excerpts and the lack of full experimental details.
 
@@ -60,8 +60,8 @@ Evaluate the nature of these prior associations. Are they from robust genetic st
 D. Balanced Concluding Assessment
 
 Conclude with a brief, balanced summary that encapsulates the strength of the evidence. This conclusion must reflect the cautious and critical nature of your analysis.
-Summarize Supporting Evidence: Briefly state the strongest, most direct lines of evidence that support [Candidate Gene] as a plausible candidate, citing the key PMIDs.
+Summarize Supporting Evidence: Briefly state the strongest, most direct lines of evidence that support {{gene}} as a plausible candidate, citing the key PMIDs.
 Summarize Limitations and Gaps: Crucially, summarize the most significant weaknesses in the argument. This includes any identified knowledge gaps, lack of specificity, reliance on non-ideal experimental models, or speculative functional links.
-Final Judgment on Plausibility: Provide a final, nuanced statement on whether [Candidate Gene] is a weak, plausible, or strong candidate based only on the provided information. Avoid definitive conclusions and frame the outcome in terms of what further research would be needed to solidify the connection.
+Final Judgment on Plausibility: Provide a final, nuanced statement on whether {{gene}} is a weak, plausible, or strong candidate based only on the provided information. Avoid definitive conclusions and frame the outcome in terms of what further research would be needed to solidify the connection.
 
 3. Source Information:

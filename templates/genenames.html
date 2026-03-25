@@ -18,11 +18,76 @@
     {%endfor%}
     </ul>
     <br>
-    {%else%}
+    {# --- Added Section for Gemini Prompt --- #}
+    {% if prompt %}
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <h4>LLM Prompt for {{gene}}</h4>
+            <button id="copy-button" onclick="copyPromptToClipboard()" class="btn btn-secondary btn-sm">Copy Prompt</button>
+        </div>
+        <textarea id="prompt-textarea" rows="20" cols="100" readonly style="width:100%; font-family: monospace; white-space: pre-wrap; word-wrap: break-word;">
+{{ prompt }}
+        </textarea>
+        
+        <script>
+        function copyPromptToClipboard() {
+            // Get the textarea element
+            var textArea = document.getElementById("prompt-textarea");
+            var copyButton = document.getElementById("copy-button");
+
+            try {
+                // Modern browsers: Use the Clipboard API
+                navigator.clipboard.writeText(textArea.value).then(function() {
+                    // Success feedback
+                    copyButton.innerText = "Copied!";
+                    setTimeout(function() {
+                        copyButton.innerText = "Copy Prompt";
+                    }, 2000); // Revert back to "Copy" after 2 seconds
+                }, function(err) {
+                    // Error callback for modern API
+                    console.error('Async: Could not copy text: ', err);
+                    // If this fails, try the fallback method
+                    fallbackCopyTextToClipboard(textArea, copyButton);
+                });
+
+            } catch (err) {
+                // If navigator.clipboard is not supported at all, go directly to fallback
+                console.log('Clipboard API not available, using fallback.');
+                fallbackCopyTextToClipboard(textArea, copyButton);
+            }
+        }
+
+        function fallbackCopyTextToClipboard(element, button) {
+            // Select the text field
+            element.select();
+            
+            // --- THIS IS THE FIX ---
+            // Set the selection range to the full length of the content.
+            // This removes the arbitrary 99999 character limit.
+            element.setSelectionRange(0, element.value.length); 
+            
+            try {
+                var successful = document.execCommand('copy');
+                if (successful) {
+                    button.innerText = "Copied!";
+                    setTimeout(function() {
+                        button.innerText = "Copy Prompt";
+                    }, 2000);
+                } else {
+                    alert('Oops, unable to copy. Please copy manually.');
+                }
+            } catch (err) {
+                console.error('Fallback: Oops, unable to copy', err);
+                alert('Oops, unable to copy. Please copy manually.');
+            }
+        }
+        </script>
+    {% else %}
+        <p>Prompt generation failed or no sentences found.</p>
+    {% endif %}
+    {# --- END OF MODIFIED SECTION --- #}
+
+{%else%}
         No synonym for {{gene}} is found. 
 {%endif%} 
 <br>
 {% endblock %}
-
-
-

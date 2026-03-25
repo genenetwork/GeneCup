@@ -34,6 +34,17 @@ from datetime import datetime
 # Gemini API related imports
 import google.generativeai as genai
 
+# Removed TensorFlow and Keras related imports
+# import tensorflow
+# import tensorflow.keras
+# from nltk.corpus import stopwords # Removed
+# from nltk.stem.porter import PorterStemmer # Removed
+# from tensorflow.keras import backend as K # Removed
+# from tensorflow.keras import metrics, optimizers # Removed
+# from tensorflow.keras.layers import * # Removed (Dense, Embedding, Flatten, Conv1D, MaxPooling1D)
+# from tensorflow.keras.models import Model, Sequential # Removed
+# from tensorflow.keras.preprocessing.sequence import pad_sequences # Removed
+# from tensorflow.keras.preprocessing.text import Tokenizer # Removed
 import re
 import ast
 from more_functions import *
@@ -124,7 +135,7 @@ def classify_stress_with_gemini(sentence_text):
         return "error_no_prompt_template"
 
     try:
-        model_gemini = genai.GenerativeModel('gemini-3-flash-preview')
+        model_gemini = genai.GenerativeModel('gemini-2.5-pro')
         
         # Append the new sentence and the final instruction to the prompt template
         # This is safer than .format() when the template contains its own curly braces.
@@ -155,7 +166,7 @@ def classify_stress_with_gemini(sentence_text):
         return "error_no_api_key"
 
     try:
-        model_gemini = genai.GenerativeModel('gemini-3-flash-preview')
+        model_gemini = genai.GenerativeModel('gemini-2.5-pro')
         prompt = f"""Classify the following sentence based on whether it describes 'systemic stress' or 'cellular stress'.
 Please return ONLY the word 'systemic' if it describes systemic stress, or ONLY the word 'cellular' if it describes cellular stress. Do not add any other explanation or punctuation.
 
@@ -1585,7 +1596,7 @@ Here are the sentences to classify:
 {sentences_to_classify_str}
 """
                 # Call the API
-                model_gemini = genai.GenerativeModel('gemini-3-flash-preview')
+                model_gemini = genai.GenerativeModel('gemini-2.5-pro')
                 response = model_gemini.generate_content(batched_prompt)
 
                 # Step 3: Parse the JSON response
