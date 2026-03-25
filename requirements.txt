@@ -1,4 +1,4 @@
-# Core Data Stack (Stable for 3.12)
+# Core Data Stack (Stable for python 3.12)
 numpy>=1.26.0
 pandas==2.2.0
 
@@ -13,7 +13,7 @@ pytz
 # Natural Language Processing
 nltk==3.5
 
-# Generative AI (Migrated to new SDK)
+# Generative AI 
 google-genai
 
 # Utilities and Sub-dependencies

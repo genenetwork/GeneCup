@@ -19,7 +19,6 @@ import pytz
 from flask import (Flask, Response, flash, jsonify, redirect, render_template,
                    request, session, url_for)
 from flask_sqlalchemy import SQLAlchemy
-# from numpy import array # Removed
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -32,7 +31,7 @@ from collections import Counter
 from datetime import datetime
 
 # Gemini API related imports
-import google.generativeai as genai
+from google import genai
 
 # Removed TensorFlow and Keras related imports
 # import tensorflow
@@ -101,17 +100,18 @@ nltk.data.path.append("./nlp/")
 with app.app_context():
     db.create_all()
 
-# Configure Gemini API Key
+# Configure Gemini API Client
 # IMPORTANT: Set the GEMINI_API_KEY environment variable
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+gemini_client = None
 if not GEMINI_API_KEY:
     print("Warning: GEMINI_API_KEY environment variable not set. Stress classification via Gemini will not work.")
 else:
     try:
-        genai.configure(api_key=GEMINI_API_KEY)
+        gemini_client = genai.Client(api_key=GEMINI_API_KEY)
     except Exception as e:
-        print(f"Error configuring Gemini API: {e}")
-        GEMINI_API_KEY = None # Ensure it's None if configuration fails
+        print(f"Error initializing Gemini API client: {e}")
+        GEMINI_API_KEY = None
 '''
 STRESS_PROMPT_TEMPLATE = ""
 try:
@@ -135,13 +135,11 @@ def classify_stress_with_gemini(sentence_text):
         return "error_no_prompt_template"
 
     try:
-        model_gemini = genai.GenerativeModel('gemini-2.5-pro')
-        
-        # Append the new sentence and the final instruction to the prompt template
-        # This is safer than .format() when the template contains its own curly braces.
-        prompt = STRESS_PROMPT_TEMPLATE + f'\nSentence: {sentence_text}\nClassification:'
-        print(prompt)
-        response = model_gemini.generate_content(prompt)
+        # Call the API using the new Client
+        response = gemini_client.models.generate_content(
+            model='gemini-2.5-pro',
+            contents=STRESS_PROMPT_TEMPLATE + f'\nSentence: {sentence_text}\nClassification:'
+        )
         # We need to parse the classification from the response
         classification = response.text.strip().lower()
         
@@ -166,7 +164,6 @@ def classify_stress_with_gemini(sentence_text):
         return "error_no_api_key"
 
     try:
-        model_gemini = genai.GenerativeModel('gemini-2.5-pro')
         prompt = f"""Classify the following sentence based on whether it describes 'systemic stress' or 'cellular stress'.
 Please return ONLY the word 'systemic' if it describes systemic stress, or ONLY the word 'cellular' if it describes cellular stress. Do not add any other explanation or punctuation.
 
@@ -174,7 +171,10 @@ Sentence: "{sentence_text}"
 
 Classification:"""
 
-        response = model_gemini.generate_content(prompt)
+        response = gemini_client.models.generate_content(
+            model='gemini-2.5-pro',
+            contents=prompt
+        )
         classification = response.text.strip().lower()
         
         if classification == "systemic":
@@ -1595,9 +1595,11 @@ Example format: {{"0": "Cellular Stress", "1": "Organismal Stress"}}
 Here are the sentences to classify:
 {sentences_to_classify_str}
 """
-                # Call the API
-                model_gemini = genai.GenerativeModel('gemini-2.5-pro')
-                response = model_gemini.generate_content(batched_prompt)
+                # Call the API using the new Client
+                response = gemini_client.models.generate_content(
+                    model='gemini-3-flash-preview',
+                    contents=batched_prompt
+                )
 
                 # Step 3: Parse the JSON response
                 # The model might wrap the JSON in ```json ... ```, so we need to clean it.
