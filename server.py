@@ -2051,5 +2051,8 @@ def top150genes():
 
 
 if __name__ == '__main__':
-    # For production, consider using a more robust web server like Gunicorn or Waitress
-    app.run(debug=True, host='0.0.0.0', port=4200) # Changed to 0.0.0.0 for accessibility if needed
+    import argparse
+    parser = argparse.ArgumentParser(description='GeneCup server')
+    parser.add_argument('-p', '--port', type=int, default=4200, help='port number (default: 4200)')
+    args = parser.parse_args()
+    app.run(debug=True, host='0.0.0.0', port=args.port)
