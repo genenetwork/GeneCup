@@ -2054,5 +2054,6 @@ if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description='GeneCup server')
     parser.add_argument('-p', '--port', type=int, default=4200, help='port number (default: 4200)')
+    parser.add_argument('-d', '--debug', action='store_true', help='enable debug mode')
     args = parser.parse_args()
-    app.run(debug=True, host='0.0.0.0', port=args.port)
+    app.run(debug=args.debug, host='0.0.0.0', port=args.port)
