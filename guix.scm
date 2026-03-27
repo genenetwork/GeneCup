@@ -226,11 +226,17 @@ access to Gemini models.")
                 (symlink (string-append js-popper
                                         "/share/javascript/popper.min.js")
                          (string-append out "/static/popper.min.js")))))
-          (add-after 'install 'wrap-executable
+          (add-after 'install 'create-bin-wrapper
             (lambda* (#:key inputs outputs #:allow-other-keys)
               (let ((out  (assoc-ref outputs "out"))
                     (path (getenv "GUIX_PYTHONPATH")))
-                (wrap-program (string-append out "/server.py")
+                (mkdir-p (string-append out "/bin"))
+                (call-with-output-file (string-append out "/bin/genecup")
+                  (lambda (port)
+                    (format port "#!~a~%cd ~a~%exec ~a/server.py \"$@\"~%"
+                            (which "bash") out out)))
+                (chmod (string-append out "/bin/genecup") #o755)
+                (wrap-program (string-append out "/bin/genecup")
                   `("PATH" ":" prefix (,(dirname (which "edirect.pl"))
                                         ,(dirname (which "dirname"))
                                         ,(dirname (which "grep"))
