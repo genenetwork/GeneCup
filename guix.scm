@@ -19,6 +19,7 @@
 (define-module (guix)
   #:use-module ((guix licenses) #:prefix license:)
   #:use-module (guix build-system pyproject)
+  #:use-module (guix build-system gnu)
   #:use-module (guix build-system python)
   #:use-module (guix download)
   #:use-module (guix gexp)
@@ -45,12 +46,80 @@
 
 (define %source-dir (dirname (current-filename)))
 
-(define nltk-punkt
+(define nltk-punkt-source
   (origin
     (method url-fetch)
     (uri "https://raw.githubusercontent.com/nltk/nltk_data/gh-pages/packages/tokenizers/punkt.zip")
     (sha256
      (base32 "1v306rjpjfcqd8mh276lfz8s1d22zgj8n0lfzh5nbbxfjj4hghsi"))))
+
+(define-public nltk-punkt
+  (package
+    (name "nltk-punkt")
+    (version "1.0")
+    (source nltk-punkt-source)
+    (build-system gnu-build-system)
+    (arguments
+     (list
+      #:phases
+      #~(modify-phases %standard-phases
+          (delete 'configure)
+          (delete 'build)
+          (delete 'check)
+          (replace 'unpack
+            (lambda* (#:key source #:allow-other-keys)
+              (invoke "unzip" source)))
+          (replace 'install
+            (lambda* (#:key outputs #:allow-other-keys)
+              (let ((out (string-append (assoc-ref outputs "out")
+                                        "/share/nltk_data/tokenizers/punkt")))
+                (mkdir-p out)
+                (copy-recursively "punkt" out)))))))
+    (native-inputs (list unzip))
+    (home-page "https://www.nltk.org/nltk_data/")
+    (synopsis "NLTK Punkt sentence tokenizer models")
+    (description "Pre-trained models for the Punkt sentence boundary
+detection tokenizer, used by NLTK's sent_tokenize function.")
+    (license license:asl2.0)))
+
+(define minipubmed-source
+  (origin
+    (method url-fetch)
+    (uri "https://git.genenetwork.org/genecup/plain/minipubmed.tgz")
+    (sha256
+     (base32 "116k7plhn7xkbv170035si7xhbfqb1ff15rxqwimjrwm8rb1bbcc"))))
+
+(define-public minipubmed
+  (package
+    (name "minipubmed")
+    (version "1.0")
+    (source minipubmed-source)
+    (build-system gnu-build-system)
+    (arguments
+     (list
+      #:phases
+      #~(modify-phases %standard-phases
+          (delete 'configure)
+          (delete 'build)
+          (delete 'check)
+          (replace 'unpack
+            (lambda* (#:key source #:allow-other-keys)
+              (invoke "tar" "xzf" source)))
+          (replace 'install
+            (lambda* (#:key inputs outputs #:allow-other-keys)
+              (let ((out (string-append (assoc-ref outputs "out")
+                                        "/share/minipubmed")))
+                ;; Generate test.xml from pmid.list
+                (with-directory-excursion "minipubmed"
+                  (system "cat pmid.list | fetch-pubmed -path PubMed/Archive/ > test.xml"))
+                (mkdir-p out)
+                (copy-recursively "minipubmed" out)))))))
+    (inputs (list edirect))
+    (home-page "https://genecup.org")
+    (synopsis "Mini PubMed archive for GeneCup testing")
+    (description "A small collection of 2473 PubMed abstracts for testing
+GeneCup with four gene symbols (gria1, crhr1, drd2, and penk).")
+    (license license:expat)))
 
 (define-public python-google-genai
   (package
@@ -119,15 +188,19 @@ access to Gemini models.")
                   (("https.*4.7.0/css/font-awesome.min.css") "/static/font-awesome.min.css")
                   (("https.*jquery-3.2.1.slim.min.js.*\\\">") "/static/jquery.slim.min.js\">")
                   (("https.*1.12.9/umd/popper.min.js.*\\\">") "/static/popper.min.js\">")))))
-          (add-after 'unpack 'install-punkt
+          (add-after 'unpack 'setup-minipubmed
             (lambda* (#:key inputs #:allow-other-keys)
-              (mkdir-p "nlp/tokenizers")
-              (invoke "unzip" #$(this-package-native-input "nltk-punkt")
-                      "-d" "nlp/tokenizers")))
-          (add-after 'unpack 'extract-pubmed-archive
-            (lambda _
-              (invoke "gzip" "-d" "minipubmed.tgz")
-              (invoke "tar" "xvf" "minipubmed.tar")))
+              (delete-file "minipubmed.tgz")
+              (let ((pubmed (string-append (assoc-ref inputs "minipubmed")
+                                           "/share/minipubmed"))
+                    (punkt  (string-append (assoc-ref inputs "nltk-punkt")
+                                           "/share/nltk_data/tokenizers/punkt")))
+                ;; Patch default pubmed path to store location
+                (substitute* "more_functions.py"
+                  (("\\./minipubmed") pubmed))
+                ;; Copy punkt tokenizer data
+                (mkdir-p "nlp/tokenizers")
+                (copy-recursively punkt "nlp/tokenizers/punkt"))))
           (replace 'install
             (lambda* (#:key outputs #:allow-other-keys)
               (let ((out (assoc-ref outputs "out")))
@@ -194,6 +267,7 @@ access to Gemini models.")
      `(("edirect" ,edirect)
        ("inetutils" ,inetutils)
        ("gzip" ,gzip)
+       ("minipubmed" ,minipubmed)
        ("tar" ,tar)
        ;; JavaScript assets symlinked into static/
        ("bootstrap" ,web-bootstrap)
@@ -202,10 +276,8 @@ access to Gemini models.")
        ("font-awesome" ,web-font-awesome)
        ("jquery" ,web-jquery)
        ("js-filesaver" ,js-filesaver-1.3.2)
+       ("nltk-punkt" ,nltk-punkt)
        ("js-popper" ,js-popper-1.12.9)))
-    (native-inputs
-     `(("nltk-punkt" ,nltk-punkt)
-       ("unzip" ,unzip)))
     (home-page "http://genecup.org")
     (synopsis "GeneCup: gene-addiction relationship search using PubMed")
     (description "GeneCup automatically extracts information from PubMed and
