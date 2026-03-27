@@ -1,10 +1,13 @@
 # GeneCup: Mining gene relationships from PubMed using custom ontology
 
+/Enhanced with AI LLM search!/
+
 URL: [https://genecup.org](https://genecup.org)
 
 GeneCup automatically extracts information from PubMed and NHGRI-EBI GWAS catalog on the relationship of any gene with a custom list of keywords hierarchically organized into an ontology. The users create an ontology by identifying categories of concepts and a list of keywords for each concept.
 
 As an example, we created an ontology for drug addiction related concepts over 300 of these keywords are organized into six categories:
+
 * names of abused drugs, e.g., opioids
 * terms describing addiction, e.g., relapse
 * key brain regions implicated in addiction, e.g., ventral striatum
@@ -22,23 +25,9 @@ Live searches are conducted through PubMed to get relevant PMIDs, which are then
 3. sort the genes based on the number of abstracts with useful sentences.
 4. generate the final list, include symbol, alias, and name
 
-## Dependencies
+## Install local mirror of PubMed
 
-* [local copy of PubMed](https://dataguide.nlm.nih.gov/edirect/archive.html)
-* python == 3.8
-* see requirements.txt and guix.scm for list of packages and versions
-
-## Deploy with GNU Guix
-
-The main genecup.org service is deployed deterministically (and self contained) using GNU Guix.
-
-See also https://issues.genenetwork.org/topics/deploy/genecup.
-
-## Development
-
-The source code and data are in a git repository: https://git.genenetwork.org/genecup/
-
-Unpack minipubmed and punkt (see below). And run, for example
+- Following the instruction provided by NCBI: https://www.nlm.nih.gov/dataguide/edirect/archive.html
 
 ## Mini PubMed for testing
 
@@ -47,23 +36,25 @@ For testing or code development, it is useful to have a small collection of PubM
 1. install [edirect](https://dataguide.nlm.nih.gov/edirect/install.html) (make sure you refresh your shell after install so the PATH is updated)
 2. unpack the minipubmed.tgz file
 3. test the installation by running:
+
 ```
 cd minipubmed
-cat pmid.list |fetch-PubMed  -path PubMed/Archive/ >test.xml
+cat pmid.list |fetch-pubmed  -path PubMed/Archive/ >test.xml
 ```
+
 You should see 2473 abstracts in the test.xml file.
 
-## NLTK tokens
+# Run the server
 
-You also need to fetch punkt.zip from https://www.nltk.org/nltk_data/
+You can use the [guix.scm](./guix.scm) container to run genecup:
 
 ```sh
-cd minipubmed
-mkdir tokenizers
-cd tokenizers
-wget https://raw.githubusercontent.com/nltk/nltk_data/gh-pages/packages/tokenizers/punkt.zip
-unzip punkt.zip
+GeneCup$ guix shell -L . -C -N -F genecup-gemini coreutils edirect -- env EDIRECT_PUBMED_MASTER=./minipubmed GEMINI_API_KEY="AIza****" ./server.py --port 4201
 ```
+
+## Development
+
+The source code and data are in a git repository: https://git.genenetwork.org/genecup/
 
 ## Support
 
