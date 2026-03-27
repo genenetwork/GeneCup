@@ -11,6 +11,10 @@
 ;;   guix shell -L ../guix-bioinformatics -L ../guix-past/modules \
 ;;     -L ../guix-rust-past-crates/modules -D -f guix.scm
 ;;
+;; Run in shell
+;;
+;;   . ./settings.sh && ./server.py
+;;
 
 (define-module (guix)
   #:use-module ((guix licenses) #:prefix license:)
@@ -33,7 +37,9 @@
   #:use-module (gnu packages python-xyz)
   #:use-module (gnu packages python-check)
   #:use-module (gnu packages python-build)
+  #:use-module (gnu packages nss)
   #:use-module (gnu packages time)
+  #:use-module (gnu packages tls)
   #:use-module (gn packages javascript)
   #:use-module (gn packages web))
 
@@ -54,7 +60,8 @@
      (list
       #:tests? #f)) ; tests require network access and API keys
     (propagated-inputs
-     (list python-google-auth
+     (list python
+           python-google-auth
            python-httpx
            python-pydantic
            python-requests
@@ -62,7 +69,8 @@
            python-websockets
            python-typing-extensions
            python-distro
-           python-sniffio))
+           python-sniffio
+           sed))
     (native-inputs
      (list python-setuptools
            python-wheel))
@@ -72,10 +80,10 @@
 access to Gemini models.")
     (license license:asl2.0)))
 
-(define-public genecup
+(define-public genecup-gemini
   (package
-    (name "genecup")
-    (version "0.0.1")
+    (name "genecup-gemini")
+    (version "1.9")
     (source (local-file %source-dir #:recursive? #t))
     (build-system python-build-system)
     (arguments
@@ -85,9 +93,9 @@ access to Gemini models.")
       #~(modify-phases %standard-phases
           (delete 'configure)
           (delete 'build)
-          (add-after 'unpack 'make-files-writable
-            (lambda _
-              (for-each make-file-writable (find-files "."))))
+          ;; (add-after 'unpack 'make-files-writable
+          ;;   (lambda _
+          ;;    (for-each make-file-writable (find-files "."))))
           (add-after 'unpack 'patch-sources
             (lambda* (#:key inputs outputs #:allow-other-keys)
               (let ((inetutils (assoc-ref inputs "inetutils")))
@@ -156,19 +164,25 @@ access to Gemini models.")
                                         ,(dirname (which "grep"))
                                         ,(dirname (which "sed"))))
                   `("GUIX_PYTHONPATH" ":" prefix (,path)))))))))
+    (propagated-inputs
+     (list
+       python-bcrypt
+       python-dotenv
+       python-flask
+       python-flask-sqlalchemy
+       python-google-genai
+       python-nltk
+       python-pandas
+       python-pytz
+       python
+       nss-certs
+       openssl
+       ))
     (inputs
      `(("edirect" ,edirect)
        ("inetutils" ,inetutils)
        ("gzip" ,gzip)
        ("tar" ,tar)
-       ("python-bcrypt" ,python-bcrypt)
-       ("python-dotenv" ,python-dotenv)
-       ("python-flask" ,python-flask)
-       ("python-flask-sqlalchemy" ,python-flask-sqlalchemy)
-       ("python-google-genai" ,python-google-genai)
-       ("python-nltk" ,python-nltk)
-       ("python-pandas" ,python-pandas)
-       ("python-pytz" ,python-pytz)
        ;; JavaScript assets symlinked into static/
        ("bootstrap" ,web-bootstrap)
        ("cytoscape" ,javascript-cytoscape-3.17)
@@ -184,4 +198,4 @@ the NHGRI-EBI GWAS catalog on the relationship of any gene with a custom list
 of keywords hierarchically organized into an ontology.")
     (license license:expat)))
 
-genecup
+genecup-gemini

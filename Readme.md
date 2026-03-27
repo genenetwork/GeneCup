@@ -37,7 +37,15 @@ For testing or code development, it is useful to have a small collection of PubM
 
 ```
 cd minipubmed
-cat pmid.list |fetch-PubMed  -path PubMed/Archive/ >test.xml
+cat pmid.list |fetch-pubmed  -path PubMed/Archive/ >test.xml
 ```
 
 You should see 2473 abstracts in the test.xml file.
+
+# Run the server
+
+You can use the [guix.scm](./guix.scm) container to run genecup:
+
+```sh
+GeneCup$ guix shell -L . -C -N -F genecup-gemini coreutils edirect -- env EDIRECT_PUBMED_MASTER=./minipubmed GEMINI_API_KEY="AIza****" ./server.py --port 4201
+```
