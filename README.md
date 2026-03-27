@@ -44,12 +44,24 @@ cat pmid.list |fetch-pubmed  -path PubMed/Archive/ >test.xml
 
 You should see 2473 abstracts in the test.xml file.
 
+## NLTK tokens
+
+You also need to fetch punkt.zip from https://www.nltk.org/nltk_data/
+
+```sh
+cd minipubmed
+mkdir tokenizers
+cd tokenizers
+wget https://raw.githubusercontent.com/nltk/nltk_data/gh-pages/packages/tokenizers/punkt.zip
+unzip punkt.zip
+```
+
 # Run the server
 
 You can use the [guix.scm](./guix.scm) container to run genecup:
 
 ```sh
-GeneCup$ guix shell -L . -C -N -F genecup-gemini coreutils edirect -- env EDIRECT_PUBMED_MASTER=./minipubmed GEMINI_API_KEY="AIza****" ./server.py --port 4201
+GeneCup$ guix shell -L . -C -N -F genecup-gemini coreutils edirect -- env EDIRECT_PUBMED_MASTER=./minipubmed NLTK_DATA=./minipubmed GEMINI_API_KEY="AIza****" ./server.py --port 4201
 ```
 
 ## Development
