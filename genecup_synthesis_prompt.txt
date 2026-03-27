@@ -1,0 +1,67 @@
+﻿Is GeneSymbol {{gene}} a likely causal gene? 
+
+Below is a prompt you can paste into a large language model to answer this question. Please make sure you edit the research context section to fit your study.
+
+1. Research Context:
+
+Study: Genome-Wide Association Study 
+Organism: 
+Phenotype:
+Candidate Gene: {{gene}}
+
+Goal: To critically evaluate {{gene}} as a plausible causal gene for the [Phenotype] by analyzing the literature excerpts provided at the end of this prompt with appropriate scientific caution.
+
+2. Required Analysis:
+Please perform the following four-step analysis based on the Source Information provided at the end. Your evaluation must be rigorous and avoid overstating claims. Acknowledge the limitations of interpreting isolated sentences and prioritize a nuanced perspective.
+
+A. Term Disambiguation
+
+For each sentence provided in the "Source Information" section, confirm if the term "{{gene}}" unambiguously refers to the intended gene. If the term is used ambiguously or refers to another scientific concept, state this and exclude the sentence from further analysis. Proceed only with the confirmed sentences.
+
+B. Synthesis of Function and Experimental Context
+
+From the sentences confirmed in Step A, synthesize the known biological functions of {{gene}}. Do not create a single, flattened narrative. Instead, structure your summary to reflect the nuance of the findings:
+Characterize Each Function: For each reported function, describe what the gene does.
+Note the Experimental System: Specify the context for each finding. Was it observed in vivo (e.g., in a mouse model), in vitro (e.g., in a specific cell line like HEK293), or is it a finding from a computational prediction? (Cite PMID/ID).
+Distinguish Strength of Claims: Differentiate between established, speculative, or indirect roles. For example, note if the source text uses cautious language like "may regulate," "is associated with," or "is thought to be involved in." (Cite PMID/ID).
+Acknowledge Inconsistencies: If any sentences suggest conflicting or different roles for the gene, highlight these discrepancies rather than ignoring them.
+
+C. Critical Evaluation of Causal Gene Plausibility (with In-text Citations)
+
+Construct a detailed scientific evaluation of {{gene}}'s plausibility for [Phenotype]. Your argument must be built cautiously, explicitly weighing the evidence for and against the gene's candidacy. Every claim you make must be immediately followed by its source (PMID/ID).
+
+Start with an Initial Caveat that acknowledges the inherent limitations of this analysis, such as the small number of excerpts and the lack of full experimental details.
+
+Then, structure your evaluation by critically assessing the following lines of evidence:
+
+Assessment of Functional Plausibility:
+
+How might the gene's known functions (from step B) mechanistically influence the biology of the phenotype? (Cite PMID/ID).
+Critically assess the strength of this link. Is the function a general cellular process (e.g., "cell proliferation"), which would be less compelling, or is it a specific process highly relevant to the phenotype (e.g., "dopaminergic synapse regulation")?
+Explicitly state if the connection is direct and supported by strong evidence, or if it is speculative and requires inferential leaps.
+
+Assessment of Tissue/Cell Type Relevance:
+
+Does the literature state that the gene is expressed in tissues or cell types known to be relevant to the phenotype? (Cite PMID/ID).
+Evaluate the specificity of this expression. Is it broadly expressed everywhere, or is its expression enriched in a key tissue (e.g., the nucleus accumbens for an addiction phenotype)? A lack of specificity weakens the argument.
+If no expression data is provided, state this as a critical knowledge gap.
+
+Assessment of Pathway and Network Involvement:
+
+Does the literature place the gene within specific biological pathways or interaction networks? (Cite PMID/ID).
+Are these pathways/networks already strongly implicated in the phenotype? Provide this context.
+Assess the gene's position in the pathway. A downstream effector might be a stronger candidate than a vaguely associated upstream component. If the nature of the involvement is unclear, state this.
+
+Assessment of Existing Disease/Trait Associations:
+
+Has the gene been previously associated with the target phenotype, or with mechanistically related traits or diseases in any organism? (Cite PMID/ID).
+Evaluate the nature of these prior associations. Are they from robust genetic studies (like other GWAS) or from smaller-scale molecular studies? An association from a large human GWAS is more compelling than a preliminary finding in a cell culture model.
+
+D. Balanced Concluding Assessment
+
+Conclude with a brief, balanced summary that encapsulates the strength of the evidence. This conclusion must reflect the cautious and critical nature of your analysis.
+Summarize Supporting Evidence: Briefly state the strongest, most direct lines of evidence that support {{gene}} as a plausible candidate, citing the key PMIDs.
+Summarize Limitations and Gaps: Crucially, summarize the most significant weaknesses in the argument. This includes any identified knowledge gaps, lack of specificity, reliance on non-ideal experimental models, or speculative functional links.
+Final Judgment on Plausibility: Provide a final, nuanced statement on whether {{gene}} is a weak, plausible, or strong candidate based only on the provided information. Avoid definitive conclusions and frame the outcome in terms of what further research would be needed to solidify the connection.
+
+3. Source Information:

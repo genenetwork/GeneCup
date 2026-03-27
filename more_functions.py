@@ -3,11 +3,9 @@ from nltk.tokenize import sent_tokenize
 import os
 import re
 
-from nltk.util import pr
 from addiction_keywords import *
 from gene_synonyms import *
 import ast
-from flask import session
 
 global pubmed_path
 
@@ -29,7 +27,6 @@ def getabstracts(gene,query):
         + " | xtract -pattern PubmedArticle -element MedlineCitation/PMID,ArticleTitle,AbstractText|sed \"s/-/ /g\"").read()
     return(abstracts)
 
-sentences_ls=[]
 def getSentences(gene, sentences_ls):
     out=str()
     # Keep the sentence only if it contains the gene 

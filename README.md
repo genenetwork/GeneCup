@@ -26,23 +26,19 @@ Live searches are conducted through PubMed to get relevant PMIDs, which are then
 
 * [local copy of PubMed](https://dataguide.nlm.nih.gov/edirect/archive.html)
 * python == 3.8
-* see requirements.txt for list of packages and versions
+* see requirements.txt and guix.scm for list of packages and versions
 
 ## Deploy with GNU Guix
 
-The main genecup.org service is deployed deterministically (and self contained) using GNU Guix. See https://issues.genenetwork.org/topics/deploy/genecup and https://git.genenetwork.org/guix-bioinformatics/
+The main genecup.org service is deployed deterministically (and self contained) using GNU Guix.
+
+See also https://issues.genenetwork.org/topics/deploy/genecup.
 
 ## Development
 
 The source code and data are in a git repository: https://git.genenetwork.org/genecup/
 
-Unpack minipubmed and punkt (see below). And run, for example, using GNU Guix:
-
-```sh
-guix shell -C -N -F python python-flask coreutils-minimal python-bcrypt python-nltk python-numpy python-pandas python-regex python-flask-sqlalchemy edirect inetutils python-keras tensorflow sed -- env EDIRECT_PUBMED_MASTER=minipubmed/ NLTK_DATA=`pwd`/minipubmed ./server.py
-```
-
-and the service should be listening on port 4200.
+Unpack minipubmed and punkt (see below). And run, for example
 
 ## Mini PubMed for testing
 
@@ -68,10 +64,6 @@ cd tokenizers
 wget https://raw.githubusercontent.com/nltk/nltk_data/gh-pages/packages/tokenizers/punkt.zip
 unzip punkt.zip
 ```
-
-## Source code
-
-https://git.genenetwork.org/genecup/
 
 ## Support
 
