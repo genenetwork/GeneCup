@@ -59,7 +59,14 @@ except FileNotFoundError:
 except Exception as e:
     print(f"Error loading genecup_synthesis_prompt.txt: {e}. LLM prompts will be affected.")
 
+VERSION=None
 
+def version():
+    global VERSION
+    if VERSION is None:
+        with open("VERSION", 'r') as file:
+            VERSION = file.read()
+    return VERSION
 
 
 app=Flask(__name__)
@@ -256,7 +263,7 @@ def root():
 
     onto_cont=open("addiction.onto","r").read()
     dict_onto=ast.literal_eval(onto_cont)
-    return render_template('index.html',onto_len_dir=onto_len_dir, onto_list=onto_list, ontol = 'addiction', dict_onto = dict_onto)
+    return render_template('index.html',onto_len_dir=onto_len_dir, onto_list=onto_list, ontol = 'addiction', dict_onto = dict_onto,version=version())
 
 
 @app.route("/login", methods=["POST", "GET"])
@@ -283,8 +290,8 @@ def login():
             onto_list = session['onto_list']
         else:
             flash("Invalid username or password!", "inval")
-            return render_template('signup.html')
-    return render_template('index.html',onto_len_dir=onto_len_dir, onto_list=onto_list, ontol = 'addiction', dict_onto = dict_onto)
+            return render_template('signup.html',version=version())
+    return render_template('index.html',onto_len_dir=onto_len_dir, onto_list=onto_list, ontol = 'addiction', dict_onto = dict_onto,version=version())
 
 
 @app.route("/signup", methods=["POST", "GET"])
@@ -302,7 +309,7 @@ def signup():
 
         if (found_user and (bcrypt.checkpw(password.encode('utf8'), found_user.password)==False)):
             flash("Already registered, but wrong password!", "inval")
-            return render_template('signup.html',onto_len_dir=onto_len_dir, onto_list=onto_list, ontol = 'addiction', dict_onto = dict_onto)  
+            return render_template('signup.html',onto_len_dir=onto_len_dir, onto_list=onto_list, ontol = 'addiction', dict_onto = dict_onto,version=version())  
 
         session['email'] = email
         session['hashed_email'] = hashlib.md5(session['email'] .encode('utf-8')).hexdigest()
@@ -328,12 +335,12 @@ def signup():
             os.makedirs(session['user_folder']+"/ontology/")
 
         flash("Login Succesful!")
-        return render_template('index.html',onto_len_dir=onto_len_dir, onto_list=onto_list, ontol = 'addiction', dict_onto = dict_onto)
+        return render_template('index.html',onto_len_dir=onto_len_dir, onto_list=onto_list, ontol = 'addiction', dict_onto = dict_onto,version=version())
     else:
         if 'email' in session:
             flash("Already Logged In!")
-            return render_template('index.html',onto_len_dir=onto_len_dir, onto_list=onto_list, ontol = 'addiction', dict_onto = dict_onto)
-        return render_template('signup.html',onto_len_dir=onto_len_dir, onto_list=onto_list, ontol = 'addiction', dict_onto = dict_onto)
+            return render_template('index.html',onto_len_dir=onto_len_dir, onto_list=onto_list, ontol = 'addiction', dict_onto = dict_onto,version=version())
+        return render_template('signup.html',onto_len_dir=onto_len_dir, onto_list=onto_list, ontol = 'addiction', dict_onto = dict_onto,version=version())
 
 
 @app.route("/signin", methods=["POST", "GET"])
@@ -357,11 +364,11 @@ def signin():
             onto_len_dir = session['onto_len_dir']
             onto_list = session['onto_list']
             dict_onto=ast.literal_eval(onto_cont)
-            return render_template('index.html', onto_len_dir=onto_len_dir, onto_list=onto_list, ontol = 'addiction', dict_onto = dict_onto)
+            return render_template('index.html', onto_len_dir=onto_len_dir, onto_list=onto_list, ontol = 'addiction', dict_onto = dict_onto,version=version())
         else:
             flash("Invalid username or password!", "inval")
-            return render_template('signup.html')   
-    return render_template('signin.html')
+            return render_template('signup.html',version=version())   
+    return render_template('signin.html',version=version())
 
 # change password 
 @app.route("/<nm_passwd>", methods=["POST", "GET"])
@@ -387,7 +394,7 @@ def profile(nm_passwd):
                 onto_list = ''
                 onto_cont=open("addiction.onto","r").read()
                 dict_onto=ast.literal_eval(onto_cont)
-                return render_template('index.html', onto_len_dir=onto_len_dir, onto_list=onto_list, ontol = 'addiction', dict_onto = dict_onto)
+                return render_template('index.html', onto_len_dir=onto_len_dir, onto_list=onto_list, ontol = 'addiction', dict_onto = dict_onto,version=version())
             # remove reserved characters from the hashed passwords
             reserved = (";", "/", "?", ":", "@", "=", "&", ".")
             def replace_reserved(fullstring):
@@ -397,7 +404,7 @@ def profile(nm_passwd):
             replaced_passwd = replace_reserved(str(found_user.password))
 
             if replaced_passwd == user_passwd:
-                return render_template("/passwd_change.html", name=user_name)
+                return render_template("/passwd_change.html", name=user_name,version=version())
             else:
                 return "This url does not exist"
         else: 
@@ -422,12 +429,12 @@ def logout():
     flash(f"You have been logged out, {user1}", "inval") # Used f-string for clarity
     session.pop('email', None)
     session.clear()
-    return render_template('index.html',onto_len_dir=onto_len_dir, onto_list=onto_list, ontol = 'addiction', dict_onto = dict_onto)
+    return render_template('index.html',onto_len_dir=onto_len_dir, onto_list=onto_list, ontol = 'addiction', dict_onto = dict_onto,version=version())
 
 
 @app.route("/about")
 def about():
-    return render_template('about.html')
+    return render_template('about.html',version=version())
 
 
 # Ontology selection
@@ -449,7 +456,7 @@ def index_ontology():
     dict_onto=ast.literal_eval(onto_cont)
     onto_len_dir = session['onto_len_dir']
     onto_list = session['onto_list']
-    return render_template('index.html',onto_len_dir=onto_len_dir, onto_list=onto_list, ontol = session['namecat'], dict_onto=dict_onto )
+    return render_template('index.html',onto_len_dir=onto_len_dir, onto_list=onto_list, ontol = session['namecat'], dict_onto=dict_onto ,version=version())
 
 
 @app.route("/ontology", methods=["POST", "GET"])
@@ -697,7 +704,7 @@ def ontology():
     else:
         onto_len_dir=0
         onto_list=''
-    return render_template('ontology.html',dict_onto=dict_onto, namecat=name_to_html, onto_len_dir=onto_len_dir, onto_list=onto_list)
+    return render_template('ontology.html',dict_onto=dict_onto, namecat=name_to_html, onto_len_dir=onto_len_dir, onto_list=onto_list,no_footer=True,version=version())
 
 
 @app.route("/ontoarchive")
@@ -711,7 +718,7 @@ def ontoarchive():
             onto_list = ''
             onto_cont=open("addiction.onto","r").read()
             dict_onto=ast.literal_eval(onto_cont)
-            return render_template('index.html',onto_len_dir=onto_len_dir, onto_list=onto_list, ontol = 'addiction', dict_onto = dict_onto) 
+            return render_template('index.html',onto_len_dir=onto_len_dir, onto_list=onto_list, ontol = 'addiction', dict_onto = dict_onto,version=version()) 
         else:
             session['user_folder'] = datadir+"/user/"+str(session['hashed_email'])
     else:
@@ -720,7 +727,7 @@ def ontoarchive():
         onto_list = ''
         onto_cont=open("addiction.onto","r").read()
         dict_onto=ast.literal_eval(onto_cont)
-        return render_template('index.html', onto_len_dir=onto_len_dir, onto_list=onto_list, ontol = 'addiction', dict_onto = dict_onto)
+        return render_template('index.html', onto_len_dir=onto_len_dir, onto_list=onto_list, ontol = 'addiction', dict_onto = dict_onto,version=version())
 
     session_id=session['id']
     def sorted_alphanumeric(data):
@@ -746,7 +753,7 @@ def ontoarchive():
     session['onto_len_dir'] = onto_len_dir
     session['onto_list'] = onto_list
     message3="<ul><li> Click on the Date/Time to view archived results. <li>The Date/Time are based on US Central time zone.</ul> "
-    return render_template('ontoarchive.html', onto_len_dir=onto_len_dir, onto_list = onto_list, onto_folder_list=onto_folder_list, onto_directory_list=onto_directory_list, session_id=session_id, message3=message3)
+    return render_template('ontoarchive.html', onto_len_dir=onto_len_dir, onto_list = onto_list, onto_folder_list=onto_folder_list, onto_directory_list=onto_directory_list, session_id=session_id, message3=message3,version=version())
 
 
 # Remove an ontology folder
@@ -762,7 +769,7 @@ def removeonto():
         onto_list = ''
         onto_cont=open("addiction.onto","r").read()
         dict_onto=ast.literal_eval(onto_cont)
-        return render_template('index.html', onto_len_dir=onto_len_dir, onto_list=onto_list, ontol = 'addiction', dict_onto = dict_onto)
+        return render_template('index.html', onto_len_dir=onto_len_dir, onto_list=onto_list, ontol = 'addiction', dict_onto = dict_onto,version=version())
 
 
 @app.route('/progress')
@@ -792,7 +799,7 @@ def progress():
         onto_cont=open("addiction.onto","r").read()
         dict_onto=ast.literal_eval(onto_cont)
         message="<span class='text-danger'>Up to 200 terms can be searched at a time</span>"
-        return render_template('index.html' ,onto_len_dir=onto_len_dir, onto_list=onto_list, ontol = 'addiction', dict_onto = dict_onto, message=message)
+        return render_template('index.html' ,onto_len_dir=onto_len_dir, onto_list=onto_list, ontol = 'addiction', dict_onto = dict_onto, message=message,version=version())
     
     if len(genes)==0:
         if ('email' in session):
@@ -804,7 +811,7 @@ def progress():
         onto_cont=open("addiction.onto","r").read()
         dict_onto=ast.literal_eval(onto_cont)
         message="<span class='text-danger'>Please enter a search term </span>"
-        return render_template('index.html',onto_len_dir=onto_len_dir, onto_list=onto_list, ontol = 'addiction', dict_onto = dict_onto, message=message)
+        return render_template('index.html',onto_len_dir=onto_len_dir, onto_list=onto_list, ontol = 'addiction', dict_onto = dict_onto, message=message,version=version())
     
     tf_path=tempfile.gettempdir()
     genes_for_folder_name =""
@@ -892,7 +899,7 @@ def progress():
         genes_session += str(gen) + "_"
     genes_session = genes_session[:-1]
     session['query']=genes
-    return render_template('progress.html', url_in="search", url_out="cytoscape/?rnd="+rnd+"&genequery="+genes_session)
+    return render_template('progress.html', url_in="search", url_out="cytoscape/?rnd="+rnd+"&genequery="+genes_session,version=version())
 
 
 @app.route("/search")
@@ -1159,7 +1166,7 @@ def tableview():
             onto_list = ''
             onto_cont=open("addiction.onto","r").read()
             dict_onto=ast.literal_eval(onto_cont)
-            return render_template('index.html', onto_len_dir=onto_len_dir, onto_list=onto_list, ontol = 'addiction', dict_onto = dict_onto)
+            return render_template('index.html', onto_len_dir=onto_len_dir, onto_list=onto_list, ontol = 'addiction', dict_onto = dict_onto,version=version())
 
         jedges =''
         nodata_temp = 1 # Default to no data
@@ -1194,7 +1201,7 @@ def tableview():
             onto_list = ''
             onto_cont=open("addiction.onto","r").read()
             dict_onto=ast.literal_eval(onto_cont)
-            return render_template('index.html', onto_len_dir=onto_len_dir, onto_list=onto_list, ontol = 'addiction', dict_onto = dict_onto)
+            return render_template('index.html', onto_len_dir=onto_len_dir, onto_list=onto_list, ontol = 'addiction', dict_onto = dict_onto,version=version())
         
         jedges =''
         nodata_temp = 1 # Default to no data
@@ -1227,7 +1234,7 @@ def tableview():
     num_gene = gene_name.count(',')+1
 
     message3="<ul><li> <font color=\"#E74C3C\">Click on the abstract count to read sentences linking the keyword and the gene</font>  <li> Click on a keyword to see the terms included in the search. <li>View the results in <a href='\\cytoscape/?rnd={}&genequery={}'\ ><b> a graph.</b></a> </ul> Links will be preserved when the table is copy-n-pasted into a spreadsheet.".format(rnd_url,genes_url)
-    return render_template('tableview.html', genes_session_tmp = genes_session_tmp, nodata_temp=nodata_temp, num_gene=num_gene, jedges=jedges, jnodes=jnodes,gene_name=gene_name, message3=message3, rnd_url=rnd_url, genes_url=genes_url)
+    return render_template('tableview.html', genes_session_tmp = genes_session_tmp, nodata_temp=nodata_temp, num_gene=num_gene, jedges=jedges, jnodes=jnodes,gene_name=gene_name, message3=message3, rnd_url=rnd_url, genes_url=genes_url,no_footer=True,version=version())
 
 
 # Table for the zero abstract counts
@@ -1250,7 +1257,7 @@ def tableview0():
             onto_list = ''
             onto_cont=open("addiction.onto","r").read()
             dict_onto=ast.literal_eval(onto_cont)
-            return render_template('index.html', onto_len_dir=onto_len_dir, onto_list=onto_list, ontol = 'addiction', dict_onto = dict_onto)
+            return render_template('index.html', onto_len_dir=onto_len_dir, onto_list=onto_list, ontol = 'addiction', dict_onto = dict_onto,version=version())
 
         jedges =''
         nodata_temp = 1 # Default to no data
@@ -1282,7 +1289,7 @@ def tableview0():
             onto_list = ''
             onto_cont=open("addiction.onto","r").read()
             dict_onto=ast.literal_eval(onto_cont)
-            return render_template('index.html', onto_len_dir=onto_len_dir, onto_list=onto_list, ontol = 'addiction', dict_onto = dict_onto)
+            return render_template('index.html', onto_len_dir=onto_len_dir, onto_list=onto_list, ontol = 'addiction', dict_onto = dict_onto,version=version())
 
         jedges =''
         nodata_temp = 1 # Default to no data
@@ -1316,7 +1323,7 @@ def tableview0():
     gene_name = gene_name+added
     num_gene = gene_name.count(',')+1
     message4="<b> Notes: </b><li> These are the keywords that have <b>zero</b> abstract counts. <li>View all the results in <a href='\\cytoscape/?rnd={}&genequery={}'><b> a graph.</b></a> ".format(rnd_url,genes_url)
-    return render_template('tableview0.html',nodata_temp=nodata_temp, num_gene=num_gene, jedges=jedges, jnodes=jnodes,gene_name=gene_name, message4=message4)
+    return render_template('tableview0.html',nodata_temp=nodata_temp, num_gene=num_gene, jedges=jedges, jnodes=jnodes,gene_name=gene_name, message4=message4,version=version())
 
 
 @app.route("/userarchive")
@@ -1329,7 +1336,7 @@ def userarchive():
     if ('email' in session):
         if os.path.exists(datadir+"/user/"+str(session['hashed_email'])) == False:
             flash("Search history doesn't exist!")
-            return render_template('index.html', onto_len_dir=onto_len_dir, onto_list=onto_list, ontol = 'addiction', dict_onto = dict_onto)
+            return render_template('index.html', onto_len_dir=onto_len_dir, onto_list=onto_list, ontol = 'addiction', dict_onto = dict_onto,version=version())
         else:
             session['user_folder'] = datadir+"/user/"+str(session['hashed_email'])
     else:
@@ -1339,7 +1346,7 @@ def userarchive():
         onto_list = ''
         onto_cont=open("addiction.onto","r").read()
         dict_onto=ast.literal_eval(onto_cont)
-        return render_template('index.html', onto_len_dir=onto_len_dir, onto_list=onto_list, ontol = 'addiction', dict_onto = dict_onto)
+        return render_template('index.html', onto_len_dir=onto_len_dir, onto_list=onto_list, ontol = 'addiction', dict_onto = dict_onto,version=version())
 
     session_id=session['id']
     def sorted_alphanumeric(data):
@@ -1377,7 +1384,7 @@ def userarchive():
 
     len_dir = len(directory_list)
     message3="<ul><li> Click on the Date/Time to view archived results. <li>The Date/Time are based on US Central time zone.</ul> "
-    return render_template('userarchive.html', len_dir=len_dir, gene_list = gene_list, onto_list = onto_list_archive, folder_list=folder_list, directory_list=directory_list, session_id=session_id, message3=message3)
+    return render_template('userarchive.html', len_dir=len_dir, gene_list = gene_list, onto_list = onto_list_archive, folder_list=folder_list, directory_list=directory_list, session_id=session_id, message3=message3,version=version())
 
 
 # Remove the search directory
@@ -1393,7 +1400,7 @@ def remove():
         onto_list = ''
         onto_cont=open("addiction.onto","r").read()
         dict_onto=ast.literal_eval(onto_cont)
-        return render_template('index.html', onto_len_dir=onto_len_dir, onto_list=onto_list, ontol = 'addiction', dict_onto = dict_onto)
+        return render_template('index.html', onto_len_dir=onto_len_dir, onto_list=onto_list, ontol = 'addiction', dict_onto = dict_onto,version=version())
 
 
 @app.route('/date', methods=['GET', 'POST'])
@@ -1475,10 +1482,10 @@ def date():
         onto_list_session = '' # Renamed to avoid conflict
         onto_cont=open("addiction.onto","r").read()
         dict_onto=ast.literal_eval(onto_cont)
-        return render_template('index.html', onto_len_dir=onto_len_dir, onto_list=onto_list_session, ontol = 'addiction', dict_onto = dict_onto)
+        return render_template('index.html', onto_len_dir=onto_len_dir, onto_list=onto_list_session, ontol = 'addiction', dict_onto = dict_onto,version=version())
     
     message3="<ul><li> <font color=\"#E74C3C\">Click on the abstract count to read sentences linking the keyword and the gene</font> <li> Click on a keyword to see the terms included in the search. <li>View the results in <a href='\\cytoscape/?rnd={}&genequery={}'\ ><b> a graph.</b></a> </ul> Links will be preserved when the table is copy-n-pasted into a spreadsheet.".format(select_date,genes_session_str)
-    return render_template('tableview.html',nodata_temp=nodata_temp, num_gene=num_gene,genes_session_tmp = genes_session_tmp, rnd_url=select_date ,jedges=jedges, jnodes=jnodes,gene_name=gene_name, genes_url=genes_session_str, message3=message3)
+    return render_template('tableview.html',nodata_temp=nodata_temp, num_gene=num_gene,genes_session_tmp = genes_session_tmp, rnd_url=select_date ,jedges=jedges, jnodes=jnodes,gene_name=gene_name, genes_url=genes_session_str, message3=message3,no_footer=True,version=version())
 
 @app.route('/cytoscape/')
 def cytoscape():
@@ -1504,7 +1511,7 @@ def cytoscape():
             onto_list_session = '' # Renamed
             onto_cont=open("addiction.onto","r").read()
             dict_onto=ast.literal_eval(onto_cont)
-            return render_template('index.html', onto_len_dir=onto_len_dir, onto_list=onto_list_session, ontol = 'addiction', dict_onto = dict_onto)
+            return render_template('index.html', onto_len_dir=onto_len_dir, onto_list=onto_list_session, ontol = 'addiction', dict_onto = dict_onto,version=version())
 
         try:
             with open(rnd_url_path+"_0link","r") as z:
@@ -1524,7 +1531,7 @@ def cytoscape():
             onto_list_session = '' # Renamed
             onto_cont=open("addiction.onto","r").read()
             dict_onto=ast.literal_eval(onto_cont)
-            return render_template('index.html', onto_len_dir=onto_len_dir, onto_list=onto_list_session, ontol = 'addiction', dict_onto = dict_onto)
+            return render_template('index.html', onto_len_dir=onto_len_dir, onto_list=onto_list_session, ontol = 'addiction', dict_onto = dict_onto,version=version())
         
         try:
             with open(rnd_url_path+"_0link","r") as z:
@@ -1535,7 +1542,7 @@ def cytoscape():
     if (len(zeroLink.strip())>0): # Check if zeroLink has content after stripping whitespace
         message2+="<span style=\"color:darkred;\">No result was found for these genes: " + zeroLink + "</span>"
             
-    return render_template('cytoscape.html', elements=elements, message2=message2)
+    return render_template('cytoscape.html', elements=elements, message2=message2,version=version())
 
 
 @app.route("/sentences")
@@ -1558,7 +1565,7 @@ def sentences():
     matching_sents = get_sentences_from_file(tf_name, gene0, cat0)
     if not matching_sents:
         # It's possible the file was found but no sentences matched the criteria.
-        return render_template('sentences.html', sentences=f"<p>No sentences found for {gene0} and {cat0}.</p>")
+        return render_template('sentences.html', sentences=f"<p>No sentences found for {gene0} and {cat0}.</p>",no_footer=True,version=version())
 
     all_stress_sentences = []
     num_abstract = len(matching_sents)
@@ -1643,7 +1650,7 @@ Here are the sentences to classify:
         out= out1+ out2 + "<ol>" + out3
 
     # K.clear_session() # Removed
-    return render_template('sentences.html', sentences=out+"</ol><p>")
+    return render_template('sentences.html', sentences=out+"</ol><p>",no_footer=True,version=version())
 
 
 # Show the cytoscape graph for one gene from the top gene list
@@ -1659,7 +1666,7 @@ def showTopGene():
         print(f"Warning: searchArchived did not return expected data for {query}")
 
     message2="<li><strong>"+query + "</strong> is one of the top addiction genes. <li> An archived search is shown. Click on the blue circle to update the results and include keywords for brain region and gene function. <strong> The update may take a long time to finish.</strong> "
-    return render_template("cytoscape.html", elements=nodesEdges, message="Top addiction genes", message2=message2)
+    return render_template("cytoscape.html", elements=nodesEdges, message="Top addiction genes", message2=message2,version=version())
 
 '''
 @app.route("/shownode")
@@ -1695,7 +1702,7 @@ def shownode():
     if not out: # If node not found or details are empty
         out = f"<p>Details for node '{node.upper()}' not found in the current ontology.</p>"
 
-    return render_template('sentences.html', sentences=out+"<p>")
+    return render_template('sentences.html', sentences=out+"<p>",no_footer=True,version=version())
 '''
 @app.route("/shownode")
 def shownode():
@@ -1711,7 +1718,7 @@ def shownode():
         for ky in dictionary.keys():
             if node in dictionary[ky].keys():
                 out="<p>"+node.upper()+"<hr><li>"+ next(iter(dictionary[ky][node])).replace("|", "<li>")
-    return render_template('sentences.html', sentences=out+"<p>")
+    return render_template('sentences.html', sentences=out+"<p>",no_footer=True,version=version())
 
 
 
@@ -1873,11 +1880,11 @@ def synonyms():
         prompt_string = GENECUP_PROMPT_TEMPLATE.replace("{{gene}}", node)
         prompt_string += formatted_sentences
 
-        return render_template('genenames.html', case=case, gene=node.upper(), synonym_list=synonym_list, synonym_list_str=synonym_list_str, prompt=prompt_string)
+        return render_template('genenames.html', case=case, gene=node.upper(), synonym_list=synonym_list, synonym_list_str=synonym_list_str, prompt=prompt_string,version=version())
 
     except KeyError:
         case = 2
-        return render_template('genenames.html', gene=node, case=case)
+        return render_template('genenames.html', gene=node, case=case,version=version())
     except Exception as e:
         print(f"An unexpected error occurred in /synonyms for node {node}: {e}")
         return f"An error occurred while processing your request for {node}.", 500
@@ -1886,7 +1893,7 @@ def synonyms():
 @app.route("/startGeneGene")
 def startGeneGene():
     session['forTopGene']=request.args.get('forTopGene')
-    return render_template('progress.html', url_in="searchGeneGene", url_out="showGeneTopGene")
+    return render_template('progress.html', url_in="searchGeneGene", url_out="showGeneTopGene",version=version())
 
 
 @app.route("/searchGeneGene")
@@ -2041,13 +2048,13 @@ def showGeneTopGene ():
             results_content=result_f.read()
     else:
         print(f"Warning: Result file {result_file_path} not found for showGeneTopGene.")
-    return render_template('sentences.html', sentences=results_content+"<p><br>")
+    return render_template('sentences.html', sentences=results_content+"<p><br>",no_footer=True,version=version())
 
 
 # Generate a page that lists all the top 150 addiction genes with links to cytoscape graph.
 @app.route("/allTopGenes")
 def top150genes():
-    return render_template("topAddictionGene.html")
+    return render_template("topAddictionGene.html",no_footer=True,version=version())
 
 
 if __name__ == '__main__':

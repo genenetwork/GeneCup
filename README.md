@@ -5,13 +5,12 @@ URL: [https://genecup.org](https://genecup.org)
 GeneCup automatically extracts information from PubMed and NHGRI-EBI GWAS catalog on the relationship of any gene with a custom list of keywords hierarchically organized into an ontology. The users create an ontology by identifying categories of concepts and a list of keywords for each concept.
 
 As an example, we created an ontology for drug addiction related concepts over 300 of these keywords are organized into six categories:
-
-- names of abused drugs, e.g., opioids
-- terms describing addiction, e.g., relapse
-- key brain regions implicated in addiction, e.g., ventral striatum
-- neurotrasmission, e.g., dopaminergic
-- synaptic plasticity, e.g., long term potentiation
-- intracellular signaling, e.g., phosphorylation
+* names of abused drugs, e.g., opioids
+* terms describing addiction, e.g., relapse
+* key brain regions implicated in addiction, e.g., ventral striatum
+* neurotrasmission, e.g., dopaminergic
+* synaptic plasticity, e.g., long term potentiation
+* intracellular signaling, e.g., phosphorylation
 
 Live searches are conducted through PubMed to get relevant PMIDs, which are then used to retrieve the abstracts from a local archive. The relationships are presented as an interactive cytoscape graph. The nodes can be moved around to better reveal the connections. Clicking on the links will bring up the corresponding sentences in a new browser window. Stress related sentences for addiction keywords are further classified into either systemic or cellular stress using a convolutional neural network.
 
@@ -23,9 +22,23 @@ Live searches are conducted through PubMed to get relevant PMIDs, which are then
 3. sort the genes based on the number of abstracts with useful sentences.
 4. generate the final list, include symbol, alias, and name
 
-## Install local mirror of PubMed
+## Dependencies
 
-- Following the instruction provided by NCBI: https://www.nlm.nih.gov/dataguide/edirect/archive.html
+* [local copy of PubMed](https://dataguide.nlm.nih.gov/edirect/archive.html)
+* python == 3.8
+* see requirements.txt and guix.scm for list of packages and versions
+
+## Deploy with GNU Guix
+
+The main genecup.org service is deployed deterministically (and self contained) using GNU Guix.
+
+See also https://issues.genenetwork.org/topics/deploy/genecup.
+
+## Development
+
+The source code and data are in a git repository: https://git.genenetwork.org/genecup/
+
+Unpack minipubmed and punkt (see below). And run, for example
 
 ## Mini PubMed for testing
 
@@ -34,18 +47,47 @@ For testing or code development, it is useful to have a small collection of PubM
 1. install [edirect](https://dataguide.nlm.nih.gov/edirect/install.html) (make sure you refresh your shell after install so the PATH is updated)
 2. unpack the minipubmed.tgz file
 3. test the installation by running:
-
 ```
 cd minipubmed
-cat pmid.list |fetch-pubmed  -path PubMed/Archive/ >test.xml
+cat pmid.list |fetch-PubMed  -path PubMed/Archive/ >test.xml
 ```
-
 You should see 2473 abstracts in the test.xml file.
 
-# Run the server
+## NLTK tokens
 
-You can use the [guix.scm](./guix.scm) container to run genecup:
+You also need to fetch punkt.zip from https://www.nltk.org/nltk_data/
 
 ```sh
-GeneCup$ guix shell -L . -C -N -F genecup-gemini coreutils edirect -- env EDIRECT_PUBMED_MASTER=./minipubmed GEMINI_API_KEY="AIza****" ./server.py --port 4201
+cd minipubmed
+mkdir tokenizers
+cd tokenizers
+wget https://raw.githubusercontent.com/nltk/nltk_data/gh-pages/packages/tokenizers/punkt.zip
+unzip punkt.zip
+```
+
+## Support
+
+E-mail [Pjotr Prins](https://thebird.nl) or [Hao Chen](https://www.uthsc.edu/neuroscience-institute/about/faculty/chen.php).
+
+## License
+
+GeneCup source code is published under the liberal free software MIT licence (aka expat license)
+
+## Cite
+
+[GeneCup: mining PubMed and GWAS catalog for gene-keyword relationships](https://academic.oup.com/g3journal/article/12/5/jkac059/6548160) by
+Gunturkun MH, Flashner E, Wang T, Mulligan MK, Williams RW, Prins P, and Chen H.
+
+G3 (Bethesda). 2022 May 6;12(5):jkac059. doi: 10.1093/g3journal/jkac059. PMID: 35285473; PMCID: PMC9073678.
+
+```
+@article{GeneCup,
+  pmid         = {35285473},
+  author       = {Gunturkun, M. H. and Flashner, E. and Wang, T. and Mulligan, M. K. and Williams, R. W. and Prins, P. and Chen, H.},
+  title        = {{GeneCup: mining PubMed and GWAS catalog for gene-keyword relationships}},
+  journal      = {G3 (Bethesda)},
+  year         = {2022},
+  doi          = {10.1093/g3journal/jkac059},
+  url          = {http://www.ncbi.nlm.nih.gov/pubmed/35285473}
+}
 ```

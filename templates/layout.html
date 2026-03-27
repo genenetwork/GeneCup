@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-	 
+
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
@@ -16,11 +16,11 @@
 <body>
 
 <!-- Navigation bar -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+<nav class="navbar navbar-expand-lg navbar-dark">
   <div class="col-1">
 		<a href="/"><div class='img'><img src="/static/white_logo.png" class="img-fluid", style="width:60%"></div></a>
 	</div>
-  
+
   <a class="navbar-brand" href="/">GeneCup</a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
@@ -90,15 +90,29 @@
     {% endif %}
   {% endwith %}
 </div>
-<br>
-<div class="container">
+<div class="container main">
 	{% block content %}{% endblock %}
 </div>
+
+{% if not no_footer %}
+ <footer class="footer footer-dark">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                  GeneCup {{ version }}: PubMed + GWAS catalog deep learning.
+                  Cite <a href="https://academic.oup.com/g3journal/article/12/5/jkac059/6548160">GeneCup.</a>
+                </div>
+                <div class="col-md-6" align="right">
+                  <a href="https://git.genenetwork.org/genecup/">Code</a>
+                  powered by <a href="https://www.tensorflow.org/">Tensorflow</a> on <a href="https://genenetwork.org/">GeneNetwork.org</a>
+                </div>
+            </div>
+        </div>
+ </footer>
+{% endif %}
 
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
 </body>
-
-
