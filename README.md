@@ -25,9 +25,39 @@ Live searches are conducted through PubMed to get relevant PMIDs, which are then
 3. sort the genes based on the number of abstracts with useful sentences.
 4. generate the final list, include symbol, alias, and name
 
+# Run a test server
+
+You can use the [guix.scm](./guix.scm) container to run genecup:
+
+```sh
+env GEMINI_API_KEY="AIzaSy**" `guix build -L . genecup-gemini`/server.py --port 4201
+```
+
+Note that the build includes minipubmed and punkt for testing!
+
+# Run a production server
+
 ## Install local mirror of PubMed
 
 - Following the instruction provided by NCBI: https://www.nlm.nih.gov/dataguide/edirect/archive.html
+
+Point environment variables to this dir.
+
+```
+env EDIRECT_PUBMED_MASTER=/export3/PubMed GEMINI_API_KEY="AIzaSy**" `guix build -L . genecup-gemini`/server.py --port 4201
+```
+
+Environment variables used:
+
+```
+EDIRECT_PUBMED_MASTER
+GEMINI_API_KEY
+NLTK_DATA
+TMPDIR
+```
+
+# Development
+
 
 ## Mini PubMed for testing
 
@@ -56,15 +86,7 @@ wget https://raw.githubusercontent.com/nltk/nltk_data/gh-pages/packages/tokenize
 unzip punkt.zip
 ```
 
-# Run the server
-
-You can use the [guix.scm](./guix.scm) container to run genecup:
-
-```sh
-GeneCup$ guix shell -L . -C -N -F genecup-gemini coreutils edirect -- env EDIRECT_PUBMED_MASTER=./minipubmed NLTK_DATA=./minipubmed GEMINI_API_KEY="AIza****" ./server.py --port 4201
-```
-
-## Development
+## Source code
 
 The source code and data are in a git repository: https://git.genenetwork.org/genecup/
 

@@ -192,15 +192,10 @@ access to Gemini models.")
             (lambda* (#:key inputs #:allow-other-keys)
               (delete-file "minipubmed.tgz")
               (let ((pubmed (string-append (assoc-ref inputs "minipubmed")
-                                           "/share/minipubmed"))
-                    (punkt  (string-append (assoc-ref inputs "nltk-punkt")
-                                           "/share/nltk_data/tokenizers/punkt")))
+                                           "/share/minipubmed")))
                 ;; Patch default pubmed path to store location
                 (substitute* "more_functions.py"
-                  (("\\./minipubmed") pubmed))
-                ;; Copy punkt tokenizer data
-                (mkdir-p "nlp/tokenizers")
-                (copy-recursively punkt "nlp/tokenizers/punkt"))))
+                  (("\\./minipubmed") pubmed)))))
           (replace 'install
             (lambda* (#:key outputs #:allow-other-keys)
               (let ((out (assoc-ref outputs "out")))
@@ -248,7 +243,10 @@ access to Gemini models.")
                                         ,(dirname (which "dirname"))
                                         ,(dirname (which "grep"))
                                         ,(dirname (which "sed"))))
-                  `("GUIX_PYTHONPATH" ":" prefix (,path)))))))))
+                  `("GUIX_PYTHONPATH" ":" prefix (,path))
+                  `("NLTK_DATA" ":" prefix
+                    (,(string-append (assoc-ref inputs "nltk-punkt")
+                                     "/share/nltk_data"))))))))))
     (propagated-inputs
      (list
        python-bcrypt

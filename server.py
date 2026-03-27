@@ -103,6 +103,14 @@ def get_sentences_from_file(file_path, gene_name, category_name=None):
 
 nltk.data.path.append("./nlp/")
 
+# Validate punkt tokenizer is available
+try:
+    nltk.data.find('tokenizers/punkt')
+except LookupError:
+    print("ERROR: NLTK punkt tokenizer not found. Set NLTK_DATA or install punkt data.")
+    print("  NLTK data paths: " + str(nltk.data.path))
+    raise SystemExit(1)
+
 # Initialize database within application context
 with app.app_context():
     db.create_all()
