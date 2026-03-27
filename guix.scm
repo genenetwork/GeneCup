@@ -169,9 +169,6 @@ access to Gemini models.")
       #~(modify-phases %standard-phases
           (delete 'configure)
           (delete 'build)
-          ;; (add-after 'unpack 'make-files-writable
-          ;;   (lambda _
-          ;;    (for-each make-file-writable (find-files "."))))
           (add-after 'unpack 'patch-sources
             (lambda* (#:key inputs outputs #:allow-other-keys)
               (let ((inetutils (assoc-ref inputs "inetutils")))
