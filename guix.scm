@@ -7,8 +7,7 @@
 ;;
 ;; Development shell:
 ;;
-;;   guix shell -L . -C -N -F genecup-gemini coreutils -- env GEMINI_API_KEY="AIz**" ./server.py --port 4201
-;;
+;;   guix shell -L . -C -N -F genecup-gemini coreutils -- env GEMINI_API_KEY="AIz**" genecup --port 4201
 ;;
 
 (define-module (guix)

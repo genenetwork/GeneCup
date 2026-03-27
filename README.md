@@ -47,6 +47,12 @@ Point environment variables to this dir.
 env EDIRECT_PUBMED_MASTER=/export3/PubMed GEMINI_API_KEY="AIzaSy**" `guix build -L . genecup-gemini`/server.py --port 4201
 ```
 
+Even better you can run from a container:
+
+```
+guix shell -L . -C -N -F genecup-gemini coreutils -- env GEMINI_API_KEY="AIzaSy**" genecup --port 4201
+```
+
 Environment variables used:
 
 ```
