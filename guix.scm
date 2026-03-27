@@ -45,6 +45,13 @@
 
 (define %source-dir (dirname (current-filename)))
 
+(define nltk-punkt
+  (origin
+    (method url-fetch)
+    (uri "https://raw.githubusercontent.com/nltk/nltk_data/gh-pages/packages/tokenizers/punkt.zip")
+    (sha256
+     (base32 "1v306rjpjfcqd8mh276lfz8s1d22zgj8n0lfzh5nbbxfjj4hghsi"))))
+
 (define-public python-google-genai
   (package
     (name "python-google-genai")
@@ -112,6 +119,11 @@ access to Gemini models.")
                   (("https.*4.7.0/css/font-awesome.min.css") "/static/font-awesome.min.css")
                   (("https.*jquery-3.2.1.slim.min.js.*\\\">") "/static/jquery.slim.min.js\">")
                   (("https.*1.12.9/umd/popper.min.js.*\\\">") "/static/popper.min.js\">")))))
+          (add-after 'unpack 'install-punkt
+            (lambda* (#:key inputs #:allow-other-keys)
+              (mkdir-p "nlp/tokenizers")
+              (invoke "unzip" #$(this-package-native-input "nltk-punkt")
+                      "-d" "nlp/tokenizers")))
           (add-after 'unpack 'extract-pubmed-archive
             (lambda _
               (invoke "gzip" "-d" "minipubmed.tgz")
@@ -191,6 +203,9 @@ access to Gemini models.")
        ("jquery" ,web-jquery)
        ("js-filesaver" ,js-filesaver-1.3.2)
        ("js-popper" ,js-popper-1.12.9)))
+    (native-inputs
+     `(("nltk-punkt" ,nltk-punkt)
+       ("unzip" ,unzip)))
     (home-page "http://genecup.org")
     (synopsis "GeneCup: gene-addiction relationship search using PubMed")
     (description "GeneCup automatically extracts information from PubMed and
