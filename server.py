@@ -151,9 +151,11 @@ def classify_stress_with_gemini(sentence_text):
 
     try:
         # Call the API using the new Client
+        prompt_text = STRESS_PROMPT_TEMPLATE + f'\nSentence: {sentence_text}\nClassification:'
+        print(f"Gemini API call: few-shot stress classification (gemini-2.5-pro)\n  Prompt: {prompt_text}")
         response = gemini_client.models.generate_content(
             model='gemini-2.5-pro',
-            contents=STRESS_PROMPT_TEMPLATE + f'\nSentence: {sentence_text}\nClassification:'
+            contents=prompt_text
         )
         # We need to parse the classification from the response
         classification = response.text.strip().lower()
@@ -186,6 +188,7 @@ Sentence: "{sentence_text}"
 
 Classification:"""
 
+        print(f"Gemini API call: zero-shot stress classification (gemini-2.5-pro)\n  Prompt: {prompt}")
         response = gemini_client.models.generate_content(
             model='gemini-2.5-pro',
             contents=prompt
@@ -1611,6 +1614,7 @@ Here are the sentences to classify:
 {sentences_to_classify_str}
 """
                 # Call the API using the new Client
+                print(f"Gemini API call: batch stress classification (gemini-3-flash-preview)\n  Prompt: {batched_prompt}")
                 response = gemini_client.models.generate_content(
                     model='gemini-3-flash-preview',
                     contents=batched_prompt
