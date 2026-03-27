@@ -3,17 +3,12 @@
 ;;
 ;; Build with:
 ;;
-;;   guix build -L ../guix-bioinformatics -L ../guix-past/modules \
-;;     -L ../guix-rust-past-crates/modules -f guix.scm
+;;   guix build -f guix.scm
 ;;
 ;; Development shell:
 ;;
-;;   guix shell -L ../guix-bioinformatics -L ../guix-past/modules \
-;;     -L ../guix-rust-past-crates/modules -D -f guix.scm
+;;   guix shell -L . -C -N -F genecup-gemini coreutils -- env GEMINI_API_KEY="AIz**" ./server.py --port 4201
 ;;
-;; Run in shell
-;;
-;;   . ./settings.sh && ./server.py
 ;;
 
 (define-module (guix)
