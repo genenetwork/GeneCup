@@ -25,7 +25,7 @@ load_dotenv()
 import os
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-nltk.download('punkt')
+# nltk.download('punkt') - we should prefetch
 # import pickle # Removed
 from collections import Counter
 from datetime import datetime
