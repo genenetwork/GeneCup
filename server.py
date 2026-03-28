@@ -70,9 +70,7 @@ def version():
 
 
 app=Flask(__name__)
-#datadir="/export/ratspub/"
-#datadir = "."
-datadir="./"
+datadir=os.environ.get("GENECUP_DATADIR", "./")
 
 app.config['SECRET_KEY'] = '#DtfrL98G5t1dC*4'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///'+datadir+'userspub.sqlite'

@@ -41,13 +41,13 @@ Note that the build includes minipubmed and punkt for testing!
 
 - Following the instruction provided by NCBI: https://www.nlm.nih.gov/dataguide/edirect/archive.html
 
-Point environment variables to this dir.
+Point environment variables to this dir:
 
 ```
 env EDIRECT_PUBMED_MASTER=/export3/PubMed GEMINI_API_KEY="AIzaSy**" `guix build -L . genecup-gemini`/server.py --port 4201
 ```
 
-Even better you can run from a container:
+You can run from a proper container:
 
 ```
 guix shell -L . -C -N -F genecup-gemini coreutils -- env GEMINI_API_KEY="AIzaSy**" genecup --port 4201
@@ -56,9 +56,10 @@ guix shell -L . -C -N -F genecup-gemini coreutils -- env GEMINI_API_KEY="AIzaSy*
 Environment variables used:
 
 ```
-EDIRECT_PUBMED_MASTER
-GEMINI_API_KEY
-NLTK_DATA
+EDIRECT_PUBMED_MASTER: PubMed datadir
+GEMINI_API_KEY: LLM access key
+GENECUP_DATADIR: SQLITE DB directory
+NLTK_DATA: punkt directory
 TMPDIR
 ```
 
