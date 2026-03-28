@@ -141,12 +141,13 @@ def generate_edges_json(data, filename):
     return(edges_json0)
 
 def searchArchived(sets, query, filetype,sents, path_user):
+    # NOTE: dataFile, filetype, and initial nodes assignment are unused
     if sets=='topGene':
         dataFile="topGene_addiction_sentences.tab"
         nodes= "{ data: { id: '" + query +  "', nodecolor: '" + "#2471A3" + "', fontweight:700, url:'/progress?query="+query+"' } },\n"
     elif sets=='GWAS':
         dataFile="gwas_addiction.tab"
-        nodes=str()   
+        nodes=str()
     pmid_list=[]
     catCnt={}
     sn_file = ''
