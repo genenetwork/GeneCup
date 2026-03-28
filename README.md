@@ -39,28 +39,28 @@ Note that the build includes minipubmed and punkt for testing!
 
 ## Install local mirror of PubMed
 
-- Following the instruction provided by NCBI: https://www.nlm.nih.gov/dataguide/edirect/archive.html
+Following the instruction provided by NCBI: https://www.nlm.nih.gov/dataguide/edirect/archive.html unpack the data in, for example, /export/PubMed/
 
-Point environment variables to this dir:
+Point environment variables to this dir and run in the local source tree:
 
 ```
-env EDIRECT_PUBMED_MASTER=/export3/PubMed GEMINI_API_KEY="AIzaSy**" `guix build -L . genecup-gemini`/server.py --port 4201
+env EDIRECT_PUBMED_MASTER=/export GEMINI_API_KEY="AIzaSy**" `guix build -L . genecup-gemini`/server.py --port 4201
 ```
 
 You can run from a proper container:
 
 ```
-guix shell -L . -C -N -F genecup-gemini coreutils -- env GEMINI_API_KEY="AIzaSy**" genecup --port 4201
+guix shell -L . -C -N -F genecup-gemini -- env GEMINI_API_KEY="AIzaSy**" genecup --port 4201
 ```
 
 Environment variables used:
 
 ```
-EDIRECT_PUBMED_MASTER: PubMed datadir
+EDIRECT_PUBMED_MASTER: PubMed datadir (defaults to ./minipubmed)
 GEMINI_API_KEY: LLM access key
-GENECUP_DATADIR: SQLITE DB directory
-NLTK_DATA: punkt directory
-TMPDIR
+GENECUP_DATADIR: SQLITE DB directory (default .)
+NLTK_DATA: punkt directory (defaults to ./minipubmed/tokenizer)
+TMPDIR (default /tmp)
 ```
 
 # Development
