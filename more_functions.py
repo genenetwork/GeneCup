@@ -22,9 +22,11 @@ def findWholeWord(w):
 
 def getabstracts(gene,query):
     query="\"(" + query + ") AND (" + gene + " [tiab])\""
-    abstracts = os.popen("esearch -db pubmed -query " +  query \
+    cmd = "esearch -db pubmed -query " +  query \
         + " | efetch -format uid |fetch-pubmed -path "+ pubmed_path \
-        + " | xtract -pattern PubmedArticle -element MedlineCitation/PMID,ArticleTitle,AbstractText|sed \"s/-/ /g\"").read()
+        + " | xtract -pattern PubmedArticle -element MedlineCitation/PMID,ArticleTitle,AbstractText|sed \"s/-/ /g\""
+    print(f"  popen: {cmd}")
+    abstracts = os.popen(cmd).read()
     return(abstracts)
 
 def getSentences(gene, sentences_ls):
@@ -176,6 +178,7 @@ def searchArchived(sets, query, filetype,sents, path_user):
     return(nodes+edges,gwas_json,sn_file)
 
 pubmed_path=os.environ.get("EDIRECT_PUBMED_MASTER", "./minipubmed")
+print(f"  pubmed_path={pubmed_path}")
 
 if not os.path.isdir(pubmed_path):
     print(f"ERROR: EDIRECT_PUBMED_MASTER directory not found: {pubmed_path}")
