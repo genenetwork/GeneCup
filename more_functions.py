@@ -1,4 +1,4 @@
-#!/bin/env python3 
+#!/bin/env python3
 from nltk.tokenize import sent_tokenize
 import os
 import re
@@ -31,7 +31,7 @@ def getabstracts(gene,query):
 
 def getSentences(gene, sentences_ls):
     out=str()
-    # Keep the sentence only if it contains the gene 
+    # Keep the sentence only if it contains the gene
     #print(sentences_ls)
     for sent in sentences_ls:
         #if gene.lower() in sent.lower():
@@ -82,18 +82,18 @@ def gene_category(gene, cat_d, cat, abstracts,addiction_flag,dictn):
                         if re_find.findall(sent):
                             sent=sent.replace("<b>","").replace("</b>","") # remove other highlights
                             sent=re.sub(r'\b(%s)\b' % key_2, r'<b>\1</b>', sent, flags=re.I) # highlight keyword
-                            out+=gene+"\t"+ cat + "\t"+key_1+"\t"+sent+"\n"                       
+                            out+=gene+"\t"+ cat + "\t"+key_1+"\t"+sent+"\n"
     return(out)
 
 def generate_nodes(nodes_d, nodetype,nodecolor):
-    # Include all search terms even if there are no edges, just to show negative result 
+    # Include all search terms even if there are no edges, just to show negative result
     json0 =str()
     for node in nodes_d:
         json0 += "{ data: { id: '" + node +  "', nodecolor: '" + nodecolor + "', nodetype: '"+nodetype + "', url:'/shownode?nodetype=" + nodetype + "&node="+node+"' } },\n"
     return(json0)
 
 def generate_nodes_json(nodes_d, nodetype,nodecolor):
-    # Include all search terms even if there are no edges, just to show negative result 
+    # Include all search terms even if there are no edges, just to show negative result
     nodes_json0 =str()
     for node in nodes_d:
         nodes_json0 += "{ \"id\": \"" + node +  "\", \"nodecolor\": \"" + nodecolor + "\", \"nodetype\": \"" + nodetype + "\", \"url\":\"/shownode?nodetype=" + nodetype + "&node="+node+"\" },\n"
@@ -151,7 +151,7 @@ def searchArchived(sets, query, filetype,sents, path_user):
     pmid_list=[]
     catCnt={}
     sn_file = ''
-    
+
     for sn in sents:
         (symb, cat0, cat1, pmid, sent)=sn.split("\t")
         if (symb.upper() == query.upper()) :
@@ -184,7 +184,6 @@ print(f"  pubmed_path={pubmed_path}")
 if not os.path.isdir(pubmed_path):
     print(f"ERROR: EDIRECT_PUBMED_MASTER directory not found: {pubmed_path}")
     raise SystemExit(1)
-if not os.path.isdir(os.path.join(pubmed_path, "PubMed", "Archive")):
+if not os.path.isdir(os.path.join(pubmed_path, "Archive")):
     print(f"ERROR: PubMed/Archive not found in {pubmed_path}")
     raise SystemExit(1)
-
