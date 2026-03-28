@@ -25,7 +25,7 @@ load_dotenv()
 import os
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-# nltk.download('punkt') - we should prefetch
+# nltk.download('punkt') # we should prefetch
 # import pickle # Removed
 from collections import Counter
 from datetime import datetime
@@ -101,13 +101,14 @@ def get_sentences_from_file(file_path, gene_name, category_name=None):
     return matching_sentences
 
 
-nltk.data.path.append("./nlp/")
+# nltk expects tokenizers at nltk_data/tokenizers/punkt
+# nltk.data.path.append("./nlp/")
 
 # Validate punkt tokenizer is available
 try:
-    nltk.data.find('tokenizers/punkt')
+    nltk.data.find('tokenizers/punkt_tab')
 except LookupError:
-    print("ERROR: NLTK punkt tokenizer not found. Set NLTK_DATA or install punkt data.")
+    print("ERROR: NLTK punkt_tab tokenizer not found. Set NLTK_DATA or install punkt_tab data.")
     print("  NLTK data paths: " + str(nltk.data.path))
     raise SystemExit(1)
 
@@ -1016,6 +1017,7 @@ def search():
             yield "data:"+str(progress)+"\n\n"
 
             for gene in genes:
+                print(f"Fetching info for gene {gene}\n")
                 abstracts_raw = getabstracts(gene,all_d) # all_d might be empty if no search_type matches
                 print(abstracts_raw)
                 sentences_ls=[]

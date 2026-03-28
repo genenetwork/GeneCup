@@ -43,9 +43,9 @@
 (define nltk-punkt-source
   (origin
     (method url-fetch)
-    (uri "https://raw.githubusercontent.com/nltk/nltk_data/gh-pages/packages/tokenizers/punkt.zip")
+    (uri "https://raw.githubusercontent.com/nltk/nltk_data/gh-pages/packages/tokenizers/punkt_tab.zip")
     (sha256
-     (base32 "1v306rjpjfcqd8mh276lfz8s1d22zgj8n0lfzh5nbbxfjj4hghsi"))))
+     (base32 "01h11srafj57yvp74xkidikh6m7ch7qscz21lck7f9vlg4c68zz5"))))
 
 (define-public nltk-punkt
   (package
@@ -66,14 +66,14 @@
           (replace 'install
             (lambda* (#:key outputs #:allow-other-keys)
               (let ((out (string-append (assoc-ref outputs "out")
-                                        "/share/nltk_data/tokenizers/punkt")))
+                                        "/share/nltk_data/tokenizers/punkt_tab")))
                 (mkdir-p out)
-                (copy-recursively "punkt" out)))))))
+                (copy-recursively "punkt_tab" out)))))))
     (native-inputs (list unzip))
     (home-page "https://www.nltk.org/nltk_data/")
-    (synopsis "NLTK Punkt sentence tokenizer models")
+    (synopsis "NLTK Punkt_Tab sentence tokenizer models")
     (description "Pre-trained models for the Punkt sentence boundary
-detection tokenizer, used by NLTK's sent_tokenize function.")
+detection tokenizer (tab format), used by NLTK's sent_tokenize function.")
     (license license:asl2.0)))
 
 (define minipubmed-source
