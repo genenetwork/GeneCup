@@ -73,7 +73,9 @@ app=Flask(__name__)
 datadir=os.environ.get("GENECUP_DATADIR", "./")
 
 app.config['SECRET_KEY'] = '#DtfrL98G5t1dC*4'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///'+datadir+'userspub.sqlite'
+sqlitedb = 'sqlite:///'+datadir+'/userspub.sqlite'
+print(sqlitedb)
+app.config['SQLALCHEMY_DATABASE_URI'] = sqlitedb
 db = SQLAlchemy(app)
 
 
@@ -1015,7 +1017,7 @@ def search():
 
             for gene in genes:
                 abstracts_raw = getabstracts(gene,all_d) # all_d might be empty if no search_type matches
-                #print(abstracts_raw)
+                print(abstracts_raw)
                 sentences_ls=[]
 
                 for row in abstracts_raw.split("\n"):
