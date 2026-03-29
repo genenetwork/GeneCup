@@ -158,6 +158,7 @@ def classify_stress_with_gemini(sentence_text):
             model='gemini-2.5-pro',
             contents=prompt_text
         )
+        print(f"  Gemini response: {response.text.strip()}")
         # We need to parse the classification from the response
         classification = response.text.strip().lower()
 
@@ -194,6 +195,7 @@ Classification:"""
             model='gemini-2.5-pro',
             contents=prompt
         )
+        print(f"  Gemini response: {response.text.strip()}")
         classification = response.text.strip().lower()
 
         if classification == "systemic":
@@ -1621,6 +1623,7 @@ Here are the sentences to classify:
                     model='gemini-3-flash-preview',
                     contents=batched_prompt
                 )
+                print(f"  Gemini response: {response.text.strip()}")
 
                 # Step 3: Parse the JSON response
                 # The model might wrap the JSON in ```json ... ```, so we need to clean it.
