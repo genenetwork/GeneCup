@@ -35,16 +35,6 @@ You can use the [guix.scm](./guix.scm) container to run genecup:
 
 Note that the build includes minipubmed and punkt for testing!
 
-## Gemini API credentials
-
-For stress classification via Gemini, create a credentials file:
-
-```sh
-mkdir -p ~/.config/gemini
-echo "YOUR_API_KEY_HERE" > ~/.config/gemini/credentials
-```
-
-The server reads the API key from `~/.config/gemini/credentials` on startup.
 
 # Run a production server
 
@@ -73,6 +63,17 @@ NLTK_DATA: punkt_tab directory (defaults to built-in nltk-punkt)
 TMPDIR (default /tmp)
 ```
 
+## Gemini API credentials
+
+For stress classification via Gemini, create a credentials file:
+
+```sh
+mkdir -p ~/.config/gemini
+echo "YOUR_API_KEY_HERE" > ~/.config/gemini/credentials
+```
+
+The server reads the API key from `~/.config/gemini/credentials` on startup.
+
 # Development
 
 
@@ -99,7 +100,7 @@ You also need to fetch punkt.zip from https://www.nltk.org/nltk_data/
 cd minipubmed
 mkdir tokenizers
 cd tokenizers
-wget https://raw.githubusercontent.com/nltk/nltk_data/gh-pages/packages/tokenizers/punkt.zip
+wget https://raw.githubusercontent.com/nltk/nltk_data/gh-pages/packages/tokenizers/punkt_tab.zip
 unzip punkt.zip
 ```
 
@@ -107,15 +108,15 @@ unzip punkt.zip
 
 The source code and data are in a git repository: https://git.genenetwork.org/genecup/
 
-## Support
+# Support
 
 E-mail [Pjotr Prins](https://thebird.nl) or [Hao Chen](https://www.uthsc.edu/neuroscience-institute/about/faculty/chen.php).
 
-## License
+# License
 
 GeneCup source code is published under the liberal free software MIT licence (aka expat license)
 
-## Cite
+# Cite
 
 [GeneCup: mining PubMed and GWAS catalog for gene-keyword relationships](https://academic.oup.com/g3journal/article/12/5/jkac059/6548160) by
 Gunturkun MH, Flashner E, Wang T, Mulligan MK, Williams RW, Prins P, and Chen H.
