@@ -20,13 +20,35 @@ def undic(dic):
 def findWholeWord(w):
     return re.compile(r'\b({0})\b'.format(w), flags=re.IGNORECASE).search
 
+
 def getabstracts(gene,query):
+    """
+      1. esearch -db pubmed -query ... -- searches PubMed for the gene + keyword query, returns matching record IDs
+      2. efetch -format uid -- fetches just the PMIDs (unique identifiers) from the search results
+      3. fetch-pubmed -path <pubmed_path> -- looks up those PMIDs in the local PubMed mirror (avoids hitting NCBI servers
+         for the full abstracts)
+      4. xtract -pattern PubmedArticle -element MedlineCitation/PMID,ArticleTitle,AbstractText -- extracts PMID, title, and
+         abstract text from the XML into tab-separated fields
+      5. sed "s/-/ /g" -- replaces hyphens with spaces (so hyphenated gene names match keyword searches later)
+
+  So: search PubMed remotely for matching articles, get their PMIDs, retrieve the full XML from the local mirror, then extract the PMID + title + abstract as tab-separated text. efetch -format uid returns only PMIDs. The esearch itself just creates a search handle on NCBI's servers, and efetch -format uid pulls back only the numeric PMIDs from that handle. No abstracts or XML are fetched from NCBI.
+    """
+
     query="\"(" + query + ") AND (" + gene + " [tiab])\""
-    cmd = "esearch -db pubmed -query " +  query \
-        + " | efetch -format uid |fetch-pubmed -path "+ pubmed_path \
-        + " | xtract -pattern PubmedArticle -element MedlineCitation/PMID,ArticleTitle,AbstractText|sed \"s/-/ /g\""
-    print(f"  popen: {cmd}")
-    abstracts = os.popen(cmd).read()
+    # Step 1: fetch PMIDs from PubMed
+    pmid_cmd = "esearch -db pubmed -query " + query + " | efetch -format uid"
+    print(f"  popen: {pmid_cmd}")
+    pmids = os.popen(pmid_cmd).read().strip()
+    if not pmids:
+        print(f"  no PMIDs found for {gene}")
+        return ""
+    pmid_list = pmids.split("\n")
+    print(f"  PMIDs ({len(pmid_list)}): {' '.join(pmid_list)}")
+    # Step 2: fetch abstracts from local mirror
+    abs_cmd = "echo '" + pmids.replace("'", "") + "' | fetch-pubmed -path " + pubmed_path \
+        + " | xtract -pattern PubmedArticle -element MedlineCitation/PMID,ArticleTitle,AbstractText | sed \"s/-/ /g\""
+    print(f"  popen: {abs_cmd}")
+    abstracts = os.popen(abs_cmd).read()
     return(abstracts)
 
 def getSentences(gene, sentences_ls):
