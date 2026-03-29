@@ -30,10 +30,21 @@ Live searches are conducted through PubMed to get relevant PMIDs, which are then
 You can use the [guix.scm](./guix.scm) container to run genecup:
 
 ```sh
-env GEMINI_API_KEY="AIzaSy**" `guix build -L . genecup-gemini`/server.py --port 4201
+`guix build -L . genecup-gemini`/bin/genecup --port 4201
 ```
 
 Note that the build includes minipubmed and punkt for testing!
+
+## Gemini API credentials
+
+For stress classification via Gemini, create a credentials file:
+
+```sh
+mkdir -p ~/.config/gemini
+echo "YOUR_API_KEY_HERE" > ~/.config/gemini/credentials
+```
+
+The server reads the API key from `~/.config/gemini/credentials` on startup.
 
 # Run a production server
 
@@ -44,22 +55,21 @@ Following the instruction provided by NCBI: https://www.nlm.nih.gov/dataguide/ed
 Point environment variables to this dir and run in the local source tree:
 
 ```
-env EDIRECT_PUBMED_MASTER=/export GEMINI_API_KEY="AIzaSy**" `guix build -L . genecup-gemini`/server.py --port 4201
+env EDIRECT_PUBMED_MASTER=/export/PubMed `guix build -L . genecup-gemini`/bin/genecup --port 4201
 ```
 
 You can run from a proper container:
 
 ```
-guix shell -L . -C -N -F genecup-gemini -- env GEMINI_API_KEY="AIzaSy**" genecup --port 4201
+guix shell -L . -C -N -F genecup-gemini -- genecup --port 4201
 ```
 
 Environment variables used:
 
 ```
-EDIRECT_PUBMED_MASTER: PubMed datadir (defaults to ./minipubmed)
-GEMINI_API_KEY: LLM access key
+EDIRECT_PUBMED_MASTER: PubMed datadir (defaults to built-in minipubmed)
 GENECUP_DATADIR: SQLITE DB directory (default .)
-NLTK_DATA: punkt directory (defaults to ./minipubmed/tokenizer)
+NLTK_DATA: punkt_tab directory (defaults to built-in nltk-punkt)
 TMPDIR (default /tmp)
 ```
 

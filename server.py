@@ -20,10 +20,26 @@ from flask import (Flask, Response, flash, jsonify, redirect, render_template,
                    request, session, url_for)
 from flask_sqlalchemy import SQLAlchemy
 
-from dotenv import load_dotenv
-load_dotenv()
 import os
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+def _read_gemini_api_key():
+    """Read Gemini API key from ~/.config/gemini/credentials."""
+    import stat
+    cred_file = os.path.expanduser("~/.config/gemini/credentials")
+    try:
+        mode = os.stat(cred_file).st_mode & 0o777
+        if mode != 0o400:
+            print(f"ERROR: {cred_file} has permissions {oct(mode)}, expected 0400. Fix with: chmod 400 {cred_file}")
+            raise SystemExit(1)
+        with open(cred_file, 'r') as f:
+            key = f.read().strip()
+            if key:
+                return key
+    except FileNotFoundError:
+        pass
+    return None
+
+GEMINI_API_KEY = _read_gemini_api_key()
 
 # nltk.download('punkt') # we should prefetch
 # import pickle # Removed
@@ -117,11 +133,10 @@ with app.app_context():
     db.create_all()
 
 # Configure Gemini API Client
-# IMPORTANT: Set the GEMINI_API_KEY environment variable
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+GEMINI_API_KEY = _read_gemini_api_key()
 gemini_client = None
 if not GEMINI_API_KEY:
-    print("Warning: GEMINI_API_KEY environment variable not set. Stress classification via Gemini will not work.")
+    print("Warning: ~/.config/gemini/credentials not found or empty. Stress classification via Gemini will not work.")
 else:
     try:
         gemini_client = genai.Client(api_key=GEMINI_API_KEY)
@@ -1927,7 +1942,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     print("GeneCup server starting...")
     print(f"  EDIRECT_PUBMED_MASTER={os.environ.get('EDIRECT_PUBMED_MASTER', '(not set)')}")
-    print(f"  GEMINI_API_KEY={'set' if os.environ.get('GEMINI_API_KEY') else '(not set)'}")
+    print(f"  GEMINI_API_KEY={'set (from ~/.config/gemini/credentials)' if GEMINI_API_KEY else '(not set)'}")
     print(f"  NLTK_DATA={os.environ.get('NLTK_DATA', '(not set)')}")
     print(f"  GENECUP_DATADIR={os.environ.get('GENECUP_DATADIR', '(not set, default: ./)')}")
     app.run(debug=args.debug, host='0.0.0.0', port=args.port)

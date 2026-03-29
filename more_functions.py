@@ -210,3 +210,4 @@ testdir = os.path.join(pubmed_path, "Archive", "01")
 if not os.path.isdir(testdir):
     print(f"ERROR: PubMed/Archive not found in {pubmed_path}")
     raise SystemExit(1)
+    raise SystemExit(1)

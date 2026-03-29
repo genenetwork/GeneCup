@@ -7,7 +7,9 @@
 ;;
 ;; Development shell:
 ;;
-;;   guix shell -L . -C -N -F genecup-gemini coreutils -- env GEMINI_API_KEY="AIz**" genecup --port 4201
+;;   guix shell -L . -C -N -F genecup-gemini coreutils -- genecup --port 4201
+;;
+;; Note: API key is read from ~/.config/gemini/credentials
 ;;
 
 (define-module (guix)
@@ -183,7 +185,7 @@ access to Gemini models.")
             (lambda* (#:key inputs #:allow-other-keys)
               (delete-file "minipubmed.tgz")
               (let ((pubmed (string-append (assoc-ref inputs "minipubmed")
-                                           "/share/minipubmed")))
+                                           "/share/minipubmed/PubMed")))
                 ;; Patch default pubmed path to store location
                 (substitute* "more_functions.py"
                   (("\\./minipubmed") pubmed)))))
@@ -247,7 +249,6 @@ access to Gemini models.")
     (propagated-inputs
      (list
        python-bcrypt
-       python-dotenv
        python-flask
        python-flask-sqlalchemy
        python-google-genai
