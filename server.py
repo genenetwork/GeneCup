@@ -1598,6 +1598,7 @@ def sentences():
             pmid_list.append(pmid+cat0)
 
     # Step 2: If the category is 'stress' and we have sentences, perform batch classification
+    gemini_error = None
     if cat0 == 'stress' and all_stress_sentences:
         if not GEMINI_API_KEY:
             print("Gemini API key not configured. Skipping batch classification.")
@@ -1640,7 +1641,8 @@ Here are the sentences to classify:
                         out_pos += s_obj['html_line']
 
             except Exception as e:
-                print(f"Error during batch Gemini classification: {e}")
+                gemini_error = str(e)
+                print(f"Error during batch Gemini classification: {gemini_error}")
     out1="<h3>"+gene0 + " and " + cat0  + "</h3>\n"
     if len(pmid_list)>1:
         out2 = str(num_abstract) + ' sentences in ' + " <a href=\"https://www.ncbi.nlm.nih.gov/pubmed/?term=" + pmid_string.strip() +"\" target=_new>"+ str(len(pmid_list)) + ' studies' +"<br></a>" + "<br><br>"
@@ -1651,12 +1653,16 @@ Here are the sentences to classify:
 
 
     if(cat0 == 'stress'): # Only show stress classification if category is stress
+        if gemini_error:
+            error_html = f"<p><b>Gemini API error:</b> {gemini_error}</p>"
+        else:
+            error_html = ""
         if(out_neg == "" and out_pos == ""):
             # If no classification results, show all sentences if any, or a message
             if out3:
-                 out= out1+ out2 + "<b>All related sentences (Gemini classification not available or no specific stress types found):</b><hr><ol>" + out3
+                 out= out1+ out2 + error_html + "<b>All related sentences (Gemini classification not available or no specific stress types found):</b><hr><ol>" + out3
             else:
-                 out = out1 + out2 + "No sentences found for this combination, or Gemini classification yielded no results."
+                 out = out1 + out2 + error_html + "No sentences found for this combination, or Gemini classification yielded no results."
         elif(out_pos != "" and out_neg!=""):
             out = out1 + out2 + stress_systemic+out_pos + stress_cellular + out_neg
         elif(out_pos != "" and out_neg ==""):
