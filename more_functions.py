@@ -184,7 +184,7 @@ print(f"  pubmed_path={pubmed_path}")
 if not os.path.isdir(pubmed_path):
     print(f"ERROR: EDIRECT_PUBMED_MASTER directory not found: {pubmed_path}")
     raise SystemExit(1)
-testdir = os.path.join(pubmed_path, "PubMed", "Archive")
+testdir = os.path.join(pubmed_path, "Archive" "01")
 if not os.path.isdir(testdir):
     print(f"ERROR: PubMed/Archive not found in {pubmed_path}")
     raise SystemExit(1)
