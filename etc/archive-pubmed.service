@@ -1,0 +1,15 @@
+# Example of a systemd service to update the PubMed archive (with indexing)
+[Unit]
+Description=Download PubMed Archives
+After=network-online.target
+Wants=network-online.target
+AssertPathExists=/export/PubMed
+
+[Service]
+ExecStart=/usr/local/guix-profiles/genecup/bin/index-pubmed
+Environment="EDIRECT_PUBMED_MASTER=/export/PubMed" "PERL_LWP_SSL_CA_FILE=/etc/ssl/certs/ca-certificates.crt" "PATH=/usr/local/guix-profiles/ratspub/bin:/usr/sbin:/usr/bin:/sbin:/bin:/sbin:/usr/sbin"
+User=hchen
+
+[Install]
+WantedBy=multi-user.target
+
