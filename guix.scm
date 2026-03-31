@@ -24,8 +24,12 @@
   #:use-module (guix utils)
   #:use-module (gnu packages admin)
   #:use-module (gnu packages base)
-  #:use-module (gnu packages bioinformatics)
+  #:use-module (gnu packages bash)
   #:use-module (gnu packages compression)
+  #:use-module (gnu packages golang)
+  #:use-module (gnu packages golang-build)
+  #:use-module (gnu packages golang-compression)
+  #:use-module (gnu packages golang-xyz)
   #:use-module (gnu packages javascript)
   #:use-module (gnu packages python)
   #:use-module (gnu packages python-crypto)
@@ -35,6 +39,8 @@
   #:use-module (gnu packages python-check)
   #:use-module (gnu packages python-build)
   #:use-module (gnu packages nss)
+  #:use-module (gnu packages perl)
+  #:use-module (gnu packages xml)
   #:use-module (gnu packages time)
   #:use-module (gnu packages tls)
   #:use-module (gn packages javascript)
@@ -116,6 +122,134 @@ detection tokenizer (tab format), used by NLTK's sent_tokenize function.")
     (description "A small collection of 2473 PubMed abstracts for testing
 GeneCup with four gene symbols (gria1, crhr1, drd2, and penk).")
     (license license:expat)))
+
+(define-public edirect
+  (package
+    (name "edirect")
+    (version "25.2.20260328")
+    (source (origin
+              (method url-fetch)
+              (uri (string-append "https://ftp.ncbi.nlm.nih.gov/entrez/entrezdirect"
+                                  "/versions/" version
+                                  "/edirect-" version ".tar.gz"))
+              (sha256
+               (base32 "04km4hrnmiganafwn5516hm8n0var9ilhbr068chy8v95xk131x6"))
+              (modules '((guix build utils)))
+              (snippet
+               '(begin
+                  (delete-file "Mozilla-CA.tar.gz")
+                  (delete-file "cacert.pem")))))
+    (build-system gnu-build-system)
+    (arguments
+     (list
+      #:tests? #f ; tests require network access to NCBI servers
+      #:phases
+      #~(modify-phases %standard-phases
+          (delete 'configure)
+          (add-after 'unpack 'patch-go-version
+            (lambda _
+              ;; Relax Go version requirement to match available toolchain
+              (substitute* '("cmd/go.mod" "eutils/go.mod")
+                (("go 1\\.26\\.1") "go 1.26.0"))))
+          (replace 'build
+            (lambda* (#:key inputs #:allow-other-keys)
+              (setenv "HOME" (getcwd))
+              (setenv "GOTOOLCHAIN" "local")
+              (setenv "GO111MODULE" "off")
+              ;; Build GOPATH from Guix Go package inputs + local eutils
+              (let ((gopath (string-append (getcwd) "/gopath")))
+                (mkdir-p (string-append gopath "/src"))
+                (symlink (string-append (getcwd) "/eutils")
+                         (string-append gopath "/src/eutils"))
+                (setenv "GOPATH"
+                  (string-join
+                    (cons gopath
+                      (map cdr
+                        (filter
+                          (lambda (input)
+                            (directory-exists?
+                              (string-append (cdr input) "/src")))
+                          inputs)))
+                    ":")))
+              (with-directory-excursion "cmd"
+                (for-each
+                  (lambda (prog)
+                    (invoke "go" "build" "-v"
+                            "-o" (string-append prog ".Linux")
+                            (string-append prog ".go")))
+                  '("xtract" "rchive" "transmute")))))
+          (replace 'install
+            (lambda* (#:key outputs #:allow-other-keys)
+              (let ((bin (string-append (assoc-ref outputs "out") "/bin")))
+                (mkdir-p bin)
+                ;; Install Go binaries
+                (for-each
+                  (lambda (prog)
+                    (install-file (string-append "cmd/" prog ".Linux") bin))
+                  '("xtract" "rchive" "transmute"))
+                ;; Install executable scripts
+                (for-each
+                  (lambda (f)
+                    (when (and (not (file-is-directory? f))
+                               (access? f X_OK)
+                               (not (string-suffix? ".go" f))
+                               (not (string-suffix? ".py" f))
+                               (not (string-suffix? ".pm" f))
+                               (not (string-suffix? ".pdf" f))
+                               (not (string-suffix? ".pem" f))
+                               (not (string-suffix? ".gz" f))
+                               (not (member (basename f)
+                                            '("LICENSE" "README"))))
+                      (install-file f bin)))
+                  (find-files "."
+                    (lambda (f s)
+                      (and (not (string-contains f "/cmd/"))
+                           (not (string-contains f "/eutils/"))
+                           (not (string-contains f "/gopath/"))))
+                    #:directories? #f)))))
+          (add-after 'install 'wrap-programs
+            (lambda* (#:key outputs #:allow-other-keys)
+              (let* ((out (assoc-ref outputs "out"))
+                     (bin (string-append out "/bin")))
+                ;; Don't wrap .sh files -- they are sourced, not executed
+                (for-each
+                  (lambda (f)
+                    (wrap-program f `("PATH" ":" prefix (,bin))))
+                  (filter
+                    (lambda (f) (not (string-suffix? ".sh" f)))
+                    (find-files bin)))
+                ;; wrap-program renames xtract -> .xtract-real, but the
+                ;; script looks for $0.Linux, so create symlinks
+                (for-each
+                  (lambda (prog)
+                    (symlink (string-append bin "/" prog ".Linux")
+                             (string-append bin "/." prog "-real.Linux")))
+                  '("xtract" "rchive" "transmute"))))))))
+    (native-inputs
+     (list go-1.26
+           go-github-com-fatih-color
+           go-github-com-gedex-inflector
+           go-github-com-goccy-go-yaml
+           go-github-com-klauspost-compress
+           go-github-com-klauspost-cpuid-v2
+           go-github-com-klauspost-pgzip
+           go-github-com-komkom-toml
+           go-github-com-mattn-go-colorable
+           go-github-com-mattn-go-isatty
+           go-github-com-pbnjay-memory
+           go-github-com-pkg-errors
+           go-github-com-surgebase-porter2
+           go-golang-org-x-sys
+           go-golang-org-x-text))
+    (inputs (list bash-minimal coreutils perl perl-xml-simple python))
+    (home-page "https://www.ncbi.nlm.nih.gov/books/NBK179288/")
+    (synopsis "Tools for accessing the NCBI's set of databases")
+    (description "Entrez Direct (EDirect) provides access to the NCBI's suite
+of interconnected databases from a Unix terminal window.  Search terms are
+entered as command-line arguments.  Individual operations are connected with
+Unix pipes to construct multi-step queries.  Selected records can then be
+retrieved in a variety of formats.")
+    (license license:public-domain)))
 
 (define-public python-google-genai
   (package
@@ -238,7 +372,7 @@ access to Gemini models.")
                             (which "bash") out out)))
                 (chmod (string-append out "/bin/genecup") #o755)
                 (wrap-program (string-append out "/bin/genecup")
-                  `("PATH" ":" prefix (,(dirname (which "edirect.pl"))
+                  `("PATH" ":" prefix (,(dirname (which "esearch"))
                                         ,(dirname (which "dirname"))
                                         ,(dirname (which "grep"))
                                         ,(dirname (which "sed"))))
