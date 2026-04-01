@@ -211,12 +211,14 @@ GeneCup with four gene symbols (gria1, crhr1, drd2, and penk).")
             (lambda* (#:key outputs #:allow-other-keys)
               (let* ((out (assoc-ref outputs "out"))
                      (bin (string-append out "/bin")))
-                ;; Don't wrap .sh files -- they are sourced, not executed
+                ;; Don't wrap .sh (sourced) or .Linux (Go binaries)
                 (for-each
                   (lambda (f)
                     (wrap-program f `("PATH" ":" prefix (,bin))))
                   (filter
-                    (lambda (f) (not (string-suffix? ".sh" f)))
+                    (lambda (f)
+                      (and (not (string-suffix? ".sh" f))
+                           (not (string-suffix? ".Linux" f))))
                     (find-files bin)))
                 ;; wrap-program renames xtract -> .xtract-real, but the
                 ;; script looks for $0.Linux, so create symlinks
