@@ -224,7 +224,9 @@ GeneCup with four gene symbols (gria1, crhr1, drd2, and penk).")
               (let* ((out (assoc-ref outputs "out"))
                      (bin (string-append out "/bin"))
                      (coreutils (assoc-ref inputs "coreutils")))
-                ;; Don't wrap .sh (sourced) or .Linux (Go binaries)
+                ;; Only wrap scripts directly in bin/, not in
+                ;; subdirs (extern/ scripts are sourced, not executed).
+                ;; Skip .sh (sourced) and .Linux (Go binaries).
                 (for-each
                   (lambda (f)
                     (wrap-program f
@@ -232,7 +234,8 @@ GeneCup with four gene symbols (gria1, crhr1, drd2, and penk).")
                         (,bin ,(string-append coreutils "/bin")))))
                   (filter
                     (lambda (f)
-                      (and (not (string-suffix? ".sh" f))
+                      (and (string=? (dirname f) bin)
+                           (not (string-suffix? ".sh" f))
                            (not (string-suffix? ".Linux" f))))
                     (find-files bin)))
                 ;; wrap-program renames xtract -> .xtract-real, but the
