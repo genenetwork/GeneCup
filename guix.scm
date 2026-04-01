@@ -119,16 +119,16 @@ detection tokenizer (tab format), used by NLTK's sent_tokenize function.")
                   (system "cat pmid.list | fetch-pubmed -path PubMed/Archive/ > test.xml"))
                 (mkdir-p out)
                 (copy-recursively "minipubmed" out)))))))
-    (inputs (list edirect))
+    (inputs (list edirect-25))
     (home-page "https://genecup.org")
     (synopsis "Mini PubMed archive for GeneCup testing")
     (description "A small collection of 2473 PubMed abstracts for testing
 GeneCup with four gene symbols (gria1, crhr1, drd2, and penk).")
     (license license:expat)))
 
-(define-public edirect
+(define-public edirect-25
   (package
-    (name "edirect")
+    (name "edirect-25")
     (version "25.2.20260328")
     (source (origin
               (method url-fetch)
@@ -149,6 +149,12 @@ GeneCup with four gene symbols (gria1, crhr1, drd2, and penk).")
       #:phases
       #~(modify-phases %standard-phases
           (delete 'configure)
+          (add-after 'unpack 'patch-path-reset
+            (lambda _
+              ;; These scripts reset PATH=/bin:/usr/bin which breaks Guix
+              (substitute* '("xtract" "rchive" "transmute")
+                (("PATH=/bin:/usr/bin")
+                 "PATH=\"/bin:/usr/bin:$PATH\""))))
           (add-after 'unpack 'patch-go-version
             (lambda _
               ;; Relax Go version requirement to match available toolchain
@@ -421,7 +427,7 @@ access to Gemini models.")
        openssl
        ))
     (inputs
-     `(("edirect" ,edirect)
+     `(("edirect-25" ,edirect-25)
        ("inetutils" ,inetutils)
        ("gzip" ,gzip)
        ("minipubmed" ,minipubmed)
