@@ -142,7 +142,7 @@ GeneCup with four gene symbols (gria1, crhr1, drd2, and penk).")
     (build-system gnu-build-system)
     (arguments
      (list
-      #:tests? #f ; tests require network access to NCBI servers
+      #:tests? #t
       #:phases
       #~(modify-phases %standard-phases
           (delete 'configure)
@@ -226,7 +226,22 @@ GeneCup with four gene symbols (gria1, crhr1, drd2, and penk).")
                   (lambda (prog)
                     (symlink (string-append bin "/" prog ".Linux")
                              (string-append bin "/." prog "-real.Linux")))
-                  '("xtract" "rchive" "transmute"))))))))
+                  '("xtract" "rchive" "transmute")))))
+          (delete 'check)
+          (add-after 'wrap-programs 'smoke-test
+            (lambda* (#:key outputs #:allow-other-keys)
+              (let ((bin (string-append (assoc-ref outputs "out") "/bin")))
+                ;; Smoke test: xtract.Linux parses XML
+                (invoke "sh" "-c"
+                  (string-append
+                    "echo '<test><a>hello</a><b>world</b></test>' | "
+                    bin "/xtract.Linux -pattern test -element a b"
+                    " | grep -q hello"))
+                ;; Smoke test: rchive.Linux version
+                (invoke (string-append bin "/rchive.Linux") "-version")
+                ;; Smoke test: transmute.Linux version
+                (invoke (string-append bin "/transmute.Linux")
+                        "-version")))))))
     (native-inputs
      (list go-1.26
            go-github-com-fatih-color
@@ -243,6 +258,7 @@ GeneCup with four gene symbols (gria1, crhr1, drd2, and penk).")
            go-github-com-surgebase-porter2
            go-golang-org-x-sys
            go-golang-org-x-text))
+    (propagated-inputs (list grep sed))
     (inputs (list bash-minimal coreutils perl perl-xml-simple python))
     (home-page "https://www.ncbi.nlm.nih.gov/books/NBK179288/")
     (synopsis "Tools for accessing the NCBI's set of databases")
