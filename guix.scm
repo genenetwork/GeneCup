@@ -206,7 +206,10 @@ GeneCup with four gene symbols (gria1, crhr1, drd2, and penk).")
                       (and (not (string-contains f "/cmd/"))
                            (not (string-contains f "/eutils/"))
                            (not (string-contains f "/gopath/"))))
-                    #:directories? #f)))))
+                    #:directories? #f))
+                ;; Install extern/ data (contains .ini config files)
+                (copy-recursively "extern"
+                                  (string-append bin "/extern")))))
           (add-after 'install 'wrap-programs
             (lambda* (#:key outputs #:allow-other-keys)
               (let* ((out (assoc-ref outputs "out"))
