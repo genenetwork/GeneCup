@@ -26,6 +26,9 @@
   #:use-module (gnu packages base)
   #:use-module (gnu packages bash)
   #:use-module (gnu packages compression)
+  #:use-module (gnu packages curl)
+  #:use-module (gnu packages wget)
+  #:use-module (gnu packages gawk)
   #:use-module (gnu packages golang)
   #:use-module (gnu packages golang-build)
   #:use-module (gnu packages golang-compression)
@@ -211,13 +214,16 @@ GeneCup with four gene symbols (gria1, crhr1, drd2, and penk).")
                 (copy-recursively "extern"
                                   (string-append bin "/extern")))))
           (add-after 'install 'wrap-programs
-            (lambda* (#:key outputs #:allow-other-keys)
+            (lambda* (#:key inputs outputs #:allow-other-keys)
               (let* ((out (assoc-ref outputs "out"))
-                     (bin (string-append out "/bin")))
+                     (bin (string-append out "/bin"))
+                     (coreutils (assoc-ref inputs "coreutils")))
                 ;; Don't wrap .sh (sourced) or .Linux (Go binaries)
                 (for-each
                   (lambda (f)
-                    (wrap-program f `("PATH" ":" prefix (,bin))))
+                    (wrap-program f
+                      `("PATH" ":" prefix
+                        (,bin ,(string-append coreutils "/bin")))))
                   (filter
                     (lambda (f)
                       (and (not (string-suffix? ".sh" f))
@@ -261,7 +267,7 @@ GeneCup with four gene symbols (gria1, crhr1, drd2, and penk).")
            go-github-com-surgebase-porter2
            go-golang-org-x-sys
            go-golang-org-x-text))
-    (propagated-inputs (list grep sed))
+    (propagated-inputs (list curl wget grep sed gawk coreutils))
     (inputs (list bash-minimal coreutils perl perl-xml-simple python))
     (home-page "https://www.ncbi.nlm.nih.gov/books/NBK179288/")
     (synopsis "Tools for accessing the NCBI's set of databases")
