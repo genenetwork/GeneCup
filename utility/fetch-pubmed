@@ -1,0 +1,64 @@
+#!/usr/bin/env python3
+import sys
+import os
+import argparse
+import subprocess
+
+def fetch_pmids(pmids, base_path):
+    """
+    Given a list of PMIDs, locate them in the hierarchical Archive directory
+    and output their content (unzipped if necessary) to stdout.
+    
+    Structure: {base_path}/Archive/{p1}/{p2}/{p3}/{pmid}.xml.gz
+    where p1, p2, p3 are pairs from the PMID padded to 8 digits.
+    Example: PMID 1010187 -> 01010187 -> 01/01/01/1010187.xml.gz
+    """
+    archive_path = os.path.join(base_path, "Archive")
+    
+    for pmid in pmids:
+        pmid = pmid.strip()
+        if not pmid:
+            continue
+            
+        # Pad PMID to at least 8 digits for the directory structure
+        padded = pmid.zfill(8)
+        p1 = padded[0:2]
+        p2 = padded[2:4]
+        p3 = padded[4:6]
+        
+        # Possible paths (sometimes it might be .xml instead of .xml.gz, though .xml.gz is preferred)
+        file_path_gz = os.path.join(archive_path, p1, p2, p3, f"{pmid}.xml.gz")
+        file_path_xml = os.path.join(archive_path, p1, p2, p3, f"{pmid}.xml")
+        
+        if os.path.exists(file_path_gz):
+            # Use zcat or gunzip -c to stream the content to stdout
+            subprocess.run(["gunzip", "-c", file_path_gz], check=False)
+        elif os.path.exists(file_path_xml):
+            with open(file_path_xml, 'rb') as f:
+                sys.stdout.buffer.write(f.read())
+        else:
+            # Silently skip missing PMIDs as they might be handled by other steps or just missing
+            sys.stderr.write(f"Warning: PMID {pmid} not found at {file_path_gz}\n")
+
+def main():
+    parser = argparse.ArgumentParser(description="Fetch PubMed XMLs from a local mirror.")
+    parser.add_argument("-path", help="Path to the PubMed mirror (EDIRECT_PUBMED_MASTER).")
+    
+    args = parser.parse_args()
+    
+    # Use path from argument or environment variable
+    base_path = args.path or os.environ.get("EDIRECT_PUBMED_MASTER")
+    
+    if not base_path:
+        sys.stderr.write("Error: PubMed path not provided and EDIRECT_PUBMED_MASTER not set.\n")
+        sys.exit(1)
+        
+    # Read PMIDs from stdin
+    input_data = sys.stdin.read()
+    # Split by any whitespace or commas
+    pmids = input_data.replace(",", " ").split()
+    
+    fetch_pmids(pmids, base_path)
+
+if __name__ == "__main__":
+    main()

@@ -45,7 +45,8 @@ def getabstracts(gene,query):
     pmid_list = pmids.split("\n")
     print(f"  PMIDs ({len(pmid_list)}): {' '.join(pmid_list)}")
     # Step 2: fetch abstracts from local mirror
-    abs_cmd = "echo '" + pmids.replace("'", "") + "' | fetch-pubmed -path " + pubmed_path \
+    fetch_pubmed_script = os.path.abspath("utility/fetch-pubmed")
+    abs_cmd = "echo '" + pmids.replace("'", "") + "' | " + fetch_pubmed_script + " -path " + pubmed_path \
         + " | xtract -pattern PubmedArticle -element MedlineCitation/PMID,ArticleTitle,AbstractText | sed \"s/-/ /g\""
     print(f"  popen: {abs_cmd}")
     abstracts = os.popen(abs_cmd).read()
@@ -200,14 +201,13 @@ def searchArchived(sets, query, filetype,sents, path_user):
         gwas_json+="{ \"id\": \"" + edgeID + "\", \"source\": \"" + query + "\", \"target\": \"" + key + "\", \"sentCnt\": \"" + str(catCnt[key]) + "\",  \"url\":\"/sentences?edgeID=" + edgeID + "\" },\n"
     return(nodes+edges,gwas_json,sn_file)
 
-pubmed_path=os.environ.get("EDIRECT_PUBMED_MASTER", "./minipubmed")
+pubmed_path=os.environ.get("EDIRECT_PUBMED_MASTER")
 print(f"  pubmed_path={pubmed_path}")
 
-if not os.path.isdir(pubmed_path):
+if not pubmed_path or not os.path.isdir(pubmed_path):
     print(f"ERROR: EDIRECT_PUBMED_MASTER directory not found: {pubmed_path}")
     raise SystemExit(1)
-testdir = os.path.join(pubmed_path, "Archive", "01")
+testdir = os.path.join(pubmed_path, "Archive")
 if not os.path.isdir(testdir):
     print(f"ERROR: PubMed/Archive not found in {pubmed_path}")
-    raise SystemExit(1)
     raise SystemExit(1)

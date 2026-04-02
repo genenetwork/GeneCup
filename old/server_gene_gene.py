@@ -41,7 +41,8 @@ def gene_gene():
             print(f"Warning: {top_gene_pmid_file} not found. Gene-gene search might be affected.")
             open(top_gene_pmid_file, 'a').close()
 
-        abstracts_cmd = f"comm -1 -2 \"{top_gene_pmid_file}\" \"{tmp_ggPMID}\" | fetch-pubmed -path \"{pubmed_path}\" | xtract -pattern PubmedArticle -element MedlineCitation/PMID,ArticleTitle,AbstractText | sed \"s/-/ /g\""
+        fetch_pubmed_script = os.path.abspath("utility/fetch-pubmed")
+        abstracts_cmd = f"comm -1 -2 \"{top_gene_pmid_file}\" \"{tmp_ggPMID}\" | {fetch_pubmed_script} -path \"{pubmed_path}\" | xtract -pattern PubmedArticle -element MedlineCitation/PMID,ArticleTitle,AbstractText | sed \"s/-/ /g\""
         try:
             abstracts_process = os.popen(abstracts_cmd)
             abstracts = abstracts_process.read()

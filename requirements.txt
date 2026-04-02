@@ -11,7 +11,7 @@ python-dotenv
 pytz
 
 # Natural Language Processing
-nltk==3.5
+nltk==3.9.4
 
 # Generative AI 
 google-genai
