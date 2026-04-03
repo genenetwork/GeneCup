@@ -141,7 +141,9 @@ GeneCup with four gene symbols (gria1, crhr1, drd2, and penk).")
               (snippet
                '(begin
                   (delete-file "Mozilla-CA.tar.gz")
-                  (delete-file "cacert.pem")))))
+                  (delete-file "cacert.pem")))
+              (patches
+               (list (local-file "contrib/patches/edirect-xml-bounds-check.patch")))))
     (build-system gnu-build-system)
     (arguments
      (list

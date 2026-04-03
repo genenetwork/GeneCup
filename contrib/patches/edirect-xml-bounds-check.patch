@@ -1,0 +1,36 @@
+--- a/eutils/xml.go	2026-01-08 20:01:51.000000000 +0000
++++ b/eutils/xml.go	2026-04-03 06:53:30.494928480 +0000
+@@ -1791,14 +1791,23 @@
+ 
+ 				// at start of end tag
+ 				idx++
++				if idx >= txtlen {
++					return NOTAG, NONE, "", "", idx
++				}
+ 				start = idx
+ 				ch = text[idx]
+ 				// expect legal first character of element
+ 				if inFirst[ch] {
+ 					idx++
++					if idx >= txtlen {
++						return NOTAG, NONE, "", "", idx
++					}
+ 					ch = text[idx]
+ 					for inElement[ch] {
+ 						idx++
++						if idx >= txtlen {
++							return NOTAG, NONE, "", "", idx
++						}
+ 						ch = text[idx]
+ 					}
+ 					str := text[start:idx]
+@@ -1806,6 +1815,9 @@
+ 						// skip past unexpected blanks
+ 						for inBlank[ch] {
+ 							idx++
++							if idx >= txtlen {
++								return NOTAG, NONE, "", "", idx
++							}
+ 							ch = text[idx]
+ 						}
+ 						if ch != '>' {
