@@ -7,7 +7,12 @@ Run with: EDIRECT_LOCAL_ARCHIVE=/export3/PubMed/Source python3 -m unittest tests
 
 import os
 import subprocess
+import sys
 import unittest
+
+# Add project root to path so we can import more_functions
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+from more_functions import hybrid_fetch_abstracts
 
 ARCHIVE = os.environ.get("EDIRECT_LOCAL_ARCHIVE", "/export3/PubMed/Source")
 
@@ -19,7 +24,6 @@ class TestNetworkHybrid(unittest.TestCase):
         env = os.environ.copy()
         env["EDIRECT_LOCAL_ARCHIVE"] = ARCHIVE
         query = "(stress) AND (Penk [tiab])"
-        extract = "xtract -pattern PubmedArticle -element MedlineCitation/PMID"
 
         # Step 1: get PMIDs from NCBI
         r1 = subprocess.run(
@@ -31,29 +35,12 @@ class TestNetworkHybrid(unittest.TestCase):
         ncbi_pmids = [p for p in ncbi_pmids if p.strip()]
         print(f"  NCBI esearch: {len(ncbi_pmids)} PMIDs")
 
-        # Step 2: local xfetch
-        pmid_str = "\\n".join(ncbi_pmids)
-        r2 = subprocess.run(
-            ["sh", "-c",
-             f'printf "{pmid_str}" | xfetch -db pubmed | {extract}'],
-            capture_output=True, text=True, timeout=120, env=env)
-        local_pmids = set(r2.stdout.strip().split("\n")) - {""}
-        print(f"  Local xfetch: {len(local_pmids)} abstracts")
-
-        # Step 3: fallback efetch for missing
-        missing = [p for p in ncbi_pmids if p not in local_pmids]
-        print(f"  Missing from local: {len(missing)}")
-        fallback_pmids = set()
-        if missing:
-            missing_str = "\\n".join(missing)
-            r3 = subprocess.run(
-                ["sh", "-c",
-                 f'printf "{missing_str}" | efetch -db pubmed -format xml | {extract}'],
-                capture_output=True, text=True, timeout=120, env=env)
-            fallback_pmids = set(r3.stdout.strip().split("\n")) - {""}
-            print(f"  NCBI fallback: {len(fallback_pmids)} abstracts")
-
-        hybrid_pmids = sorted(local_pmids | fallback_pmids)
+        # Step 2: hybrid fetch using the shared function
+        abstracts = hybrid_fetch_abstracts(ncbi_pmids)
+        hybrid_pmids = set()
+        for line in abstracts.strip().split("\n"):
+            if line.strip():
+                hybrid_pmids.add(line.split("\t")[0])
         print(f"  Hybrid total: {len(hybrid_pmids)} abstracts")
 
         # Some articles have no abstract (letters, editorials) so

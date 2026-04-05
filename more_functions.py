@@ -21,6 +21,33 @@ def findWholeWord(w):
     return re.compile(r'\b({0})\b'.format(w), flags=re.IGNORECASE).search
 
 
+def hybrid_fetch_abstracts(pmid_list):
+    """Fetch abstracts for a list of PMIDs: try local xfetch first,
+    fall back to NCBI efetch for any missing.
+
+    Returns tab-separated lines: PMID, ArticleTitle, AbstractText
+    with hyphens replaced by spaces.
+    """
+    extract = "xtract -pattern PubmedArticle -element MedlineCitation/PMID,ArticleTitle,AbstractText"
+    safe_pmids = "\n".join(p.replace("'", "") for p in pmid_list)
+    # Try local xfetch
+    abs_cmd = "echo '" + safe_pmids + "' | xfetch -db pubmed | " + extract + " | sed \"s/-/ /g\""
+    print(f"  popen(local): {abs_cmd}")
+    abstracts = os.popen(abs_cmd).read()
+    # Check which PMIDs came back with abstracts
+    found_pmids = set()
+    for line in abstracts.strip().split("\n"):
+        if line.strip():
+            found_pmids.add(line.split("\t")[0])
+    missing = [p for p in pmid_list if p not in found_pmids]
+    if missing:
+        print(f"  {len(missing)} PMIDs missing from local, falling back to NCBI efetch")
+        fallback_cmd = "echo '" + "\n".join(missing) + "' | efetch -db pubmed -format xml | " + extract + " | sed \"s/-/ /g\""
+        print(f"  popen(ncbi): {fallback_cmd}")
+        extra = os.popen(fallback_cmd).read()
+        abstracts += extra
+    return abstracts
+
 def getabstracts(gene,query):
     """
       1. esearch -db pubmed -query ... -- searches PubMed for the gene + keyword query, returns matching record IDs
@@ -44,25 +71,8 @@ def getabstracts(gene,query):
         return ""
     pmid_list = pmids.split("\n")
     print(f"  PMIDs ({len(pmid_list)}): {' '.join(pmid_list)}")
-    # Step 2: fetch abstracts -- try local xfetch first, fall back to NCBI efetch
-    safe_pmids = pmids.replace("'", "")
-    extract = "xtract -pattern PubmedArticle -element MedlineCitation/PMID,ArticleTitle,AbstractText"
-    # Try local xfetch
-    abs_cmd = "echo '" + safe_pmids + "' | xfetch -db pubmed | " + extract + " | sed \"s/-/ /g\""
-    print(f"  popen(local): {abs_cmd}")
-    abstracts = os.popen(abs_cmd).read()
-    # Check which PMIDs came back with abstracts
-    found_pmids = set()
-    for line in abstracts.strip().split("\n"):
-        if line.strip():
-            found_pmids.add(line.split("\t")[0])
-    missing = [p for p in pmid_list if p not in found_pmids]
-    if missing:
-        print(f"  {len(missing)} PMIDs missing from local, falling back to NCBI efetch")
-        fallback_cmd = "echo '" + "\n".join(missing) + "' | efetch -db pubmed -format xml | " + extract + " | sed \"s/-/ /g\""
-        print(f"  popen(ncbi): {fallback_cmd}")
-        extra = os.popen(fallback_cmd).read()
-        abstracts += extra
+    # Step 2: fetch abstracts via hybrid local+NCBI
+    abstracts = hybrid_fetch_abstracts(pmid_list)
     return(abstracts)
 
 def getSentences(gene, sentences_ls):
