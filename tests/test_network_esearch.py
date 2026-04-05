@@ -18,7 +18,7 @@ class TestNetworkEsearch(unittest.TestCase):
         pmids = result.stdout.strip().split("\n")
         pmids = [p for p in pmids if p.strip()]
         print(f"  Found {len(pmids)} PMIDs for Penk+stress")
-        self.assertGreater(len(pmids), 0, "Expected at least 1 PMID")
+        self.assertGreater(len(pmids), 50, "Expected at least 50 PMID for (stress) AND (Penk [tiab])")
 
 if __name__ == "__main__":
     unittest.main()

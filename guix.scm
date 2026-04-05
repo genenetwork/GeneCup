@@ -7,7 +7,11 @@
 ;;
 ;; Development shell:
 ;;
-;;   guix shell -L . -L ../guix-bioinformatics -C -N -F genecup-gemini coreutils -- genecup --port 4201
+;;   guix shell -L . -C -N -F edirect-25 genecup-gemini coreutils -- genecup --port 4201
+;;
+;; In a shell you can run
+;;
+;;   python3 -m unittest tests.test_network_esearch
 ;;
 ;; Note: API key is read from ~/.config/gemini/credentials
 ;;
