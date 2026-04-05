@@ -7,7 +7,7 @@
 ;;
 ;; Development shell:
 ;;
-;;   guix shell -L . -C -N -F genecup-gemini coreutils -- genecup --port 4201
+;;   guix shell -L . -L ../guix-bioinformatics -C -N -F genecup-gemini coreutils -- genecup --port 4201
 ;;
 ;; Note: API key is read from ~/.config/gemini/credentials
 ;;
