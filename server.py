@@ -1941,7 +1941,7 @@ if __name__ == '__main__':
     parser.add_argument('-d', '--debug', action='store_true', help='enable debug mode')
     args = parser.parse_args()
     print("GeneCup server starting...")
-    print(f"  EDIRECT_PUBMED_MASTER={os.environ.get('EDIRECT_PUBMED_MASTER', '(not set)')}")
+    print(f"  EDIRECT_LOCAL_ARCHIVE={os.environ.get('EDIRECT_LOCAL_ARCHIVE', '(not set)')}")
     print(f"  GEMINI_API_KEY={'set (from ~/.config/gemini/credentials)' if GEMINI_API_KEY else '(not set)'}")
     print(f"  NLTK_DATA={os.environ.get('NLTK_DATA', '(not set)')}")
     print(f"  GENECUP_DATADIR={os.environ.get('GENECUP_DATADIR', '(not set, default: ./)')}")

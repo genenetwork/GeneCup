@@ -200,14 +200,14 @@ def searchArchived(sets, query, filetype,sents, path_user):
         gwas_json+="{ \"id\": \"" + edgeID + "\", \"source\": \"" + query + "\", \"target\": \"" + key + "\", \"sentCnt\": \"" + str(catCnt[key]) + "\",  \"url\":\"/sentences?edgeID=" + edgeID + "\" },\n"
     return(nodes+edges,gwas_json,sn_file)
 
-pubmed_path=os.environ.get("EDIRECT_PUBMED_MASTER", "./minipubmed")
+pubmed_path=os.environ.get("EDIRECT_LOCAL_ARCHIVE", "./minipubmed")
 print(f"  pubmed_path={pubmed_path}")
 
 if not os.path.isdir(pubmed_path):
-    print(f"ERROR: EDIRECT_PUBMED_MASTER directory not found: {pubmed_path}")
+    print(f"ERROR: EDIRECT_LOCAL_ARCHIVE directory not found: {pubmed_path} - note this is a recent env variable that replaces the others")
     raise SystemExit(1)
-testdir = os.path.join(pubmed_path, "Archive", "01")
+testdir = os.path.join(pubmed_path, "pubmed", "Archive", "00")
 if not os.path.isdir(testdir):
-    print(f"ERROR: PubMed/Archive not found in {pubmed_path}")
+    print(f"ERROR: PubMed/Archive not found in {testdir} (EDIRECT_LOCAL_ARCHIVE={pubmed_path})")
     raise SystemExit(1)
     raise SystemExit(1)
