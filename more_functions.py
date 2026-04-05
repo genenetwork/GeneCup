@@ -26,7 +26,8 @@ def esearch_pmids(query):
     print(f"  popen: {pmid_cmd}")
     pmids = os.popen(pmid_cmd).read().strip()
     pmid_list = [p for p in pmids.split("\n") if p.strip()] if pmids else []
-    _esearch_cache[key] = pmid_list
+    if pmid_list:
+        _esearch_cache[key] = pmid_list
     return pmid_list
 
 def undic(dic):

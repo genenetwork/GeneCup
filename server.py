@@ -153,8 +153,17 @@ except FileNotFoundError:
 except Exception as e:
     print(f"FATAL ERROR: Could not read stress_prompt.txt: {e}")
 
+# In-memory cache for Gemini stress classification: hash(sentence) -> result
+_gemini_cache = {}
+
 # few shot Function to classify stress using Gemini API
 def classify_stress_with_gemini(sentence_text):
+    import hashlib
+    cache_key = hashlib.sha256(sentence_text.encode()).hexdigest()
+    if cache_key in _gemini_cache:
+        print(f"  Gemini cache hit for: {sentence_text[:60]}...")
+        return _gemini_cache[cache_key]
+
     if not GEMINI_API_KEY:
         print("Gemini API key not configured. Skipping classification.")
         return "error_no_api_key"
@@ -179,12 +188,15 @@ def classify_stress_with_gemini(sentence_text):
 
         # The model might return "Cellular Level Stress" or "Organismal Stress"
         if "cellular" in classification:
-            return "neg"  # 'neg' for Cellular Level Stress
+            result = "neg"  # 'neg' for Cellular Level Stress
         elif "organismal" in classification:
-            return "pos"  # 'pos' for Organismal Stress
+            result = "pos"  # 'pos' for Organismal Stress
         else:
             print(f"Warning: Gemini returned unexpected classification: '{classification}' for sentence: '{sentence_text}'")
-            return "unknown"
+            result = "unknown"
+        if result in ("pos", "neg"):
+            _gemini_cache[cache_key] = result
+        return result
 
     except Exception as e:
         print(f"Error calling Gemini API for stress classification: {e}")
