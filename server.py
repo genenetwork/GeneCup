@@ -1516,15 +1516,9 @@ def sentences():
             # Show loading page if not cached and not yet asked to classify
             if batch_cache_key not in _gemini_cache and not request.args.get('classify'):
                 loading_url = request.url + ('&' if '?' in request.url else '?') + 'classify=1'
-                return f'''<!doctype html>
-<html><head>
-<meta http-equiv="refresh" content="1; url={loading_url}">
-<style>body {{ font-family: sans-serif; text-align: center; margin-top: 100px; }}</style>
-</head><body>
-<h2>Calling Gemini API...</h2>
-<p>Classifying {len(all_stress_sentences)} sentences as cellular/organismal stress.</p>
-<p>Please wait, this page will refresh automatically.</p>
-</body></html>'''
+                return render_template('call-gemini.html',
+                                       url=loading_url,
+                                       count=len(all_stress_sentences))
 
             try:
                 batched_prompt = f"""For each sentence below, classify it as describing "Cellular Stress" or "Organismal Stress".
