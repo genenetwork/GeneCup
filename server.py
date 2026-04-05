@@ -116,10 +116,6 @@ def get_sentences_from_file(file_path, gene_name, category_name=None):
         print(f"Error reading sentence file {file_path}: {e}")
     return matching_sentences
 
-
-# nltk expects tokenizers at nltk_data/tokenizers/punkt
-# nltk.data.path.append("./nlp/")
-
 # Validate punkt tokenizer is available
 try:
     nltk.data.find('tokenizers/punkt_tab')
@@ -143,7 +139,7 @@ else:
     except Exception as e:
         print(f"Error initializing Gemini API client: {e}")
         GEMINI_API_KEY = None
-'''
+
 STRESS_PROMPT_TEMPLATE = ""
 try:
     with open("stress_prompt.txt", "r") as f_prompt:
@@ -156,94 +152,6 @@ except Exception as e:
 # In-memory cache for Gemini stress classification: hash(sentence) -> result
 _gemini_cache = {}
 
-# few shot Function to classify stress using Gemini API
-def classify_stress_with_gemini(sentence_text):
-    import hashlib
-    cache_key = hashlib.sha256(sentence_text.encode()).hexdigest()
-    if cache_key in _gemini_cache:
-        print(f"  Gemini cache hit for: {sentence_text[:60]}...")
-        return _gemini_cache[cache_key]
-
-    if not GEMINI_API_KEY:
-        print("Gemini API key not configured. Skipping classification.")
-        return "error_no_api_key"
-
-    # --- THIS IS THE MODIFIED PART ---
-    # Check if the prompt template was loaded successfully
-    if not STRESS_PROMPT_TEMPLATE:
-        print("Stress prompt template is not available. Skipping classification.")
-        return "error_no_prompt_template"
-
-    import time
-    prompt_text = STRESS_PROMPT_TEMPLATE + f'\nSentence: {sentence_text}\nClassification:'
-    last_error = None
-    for attempt in range(3):
-        try:
-            if attempt > 0:
-                time.sleep(2 * attempt)
-                print(f"  Gemini retry {attempt + 1}/3")
-            print(f"Gemini API call: few-shot stress classification (gemini-2.5-pro)\n  Prompt: {prompt_text}")
-            response = gemini_client.models.generate_content(
-                model='gemini-2.5-pro',
-                contents=prompt_text
-            )
-            print(f"  Gemini response: {response.text.strip()}")
-            classification = response.text.strip().lower()
-
-            if "cellular" in classification:
-                result = "neg"  # 'neg' for Cellular Level Stress
-            elif "organismal" in classification:
-                result = "pos"  # 'pos' for Organismal Stress
-            else:
-                print(f"Warning: Gemini returned unexpected classification: '{classification}' for sentence: '{sentence_text}'")
-                result = "unknown"
-            if result in ("pos", "neg"):
-                _gemini_cache[cache_key] = result
-            return result
-
-        except Exception as e:
-            last_error = e
-            print(f"Error calling Gemini API (attempt {attempt + 1}/3): {e}")
-
-    print(f"Gemini API failed after 3 attempts: {last_error}")
-    return "error_api_call"
-
-
-# zero-shot Function to classify stress using Gemini API
-def classify_stress_with_gemini(sentence_text):
-    if not GEMINI_API_KEY:
-        print("Gemini API key not configured. Skipping classification.")
-        return "error_no_api_key"
-
-    try:
-        prompt = f"""Classify the following sentence based on whether it describes 'systemic stress' or 'cellular stress'.
-Please return ONLY the word 'systemic' if it describes systemic stress, or ONLY the word 'cellular' if it describes cellular stress. Do not add any other explanation or punctuation.
-
-Sentence: "{sentence_text}"
-
-Classification:"""
-
-        print(f"Gemini API call: zero-shot stress classification (gemini-2.5-pro)\n  Prompt: {prompt}")
-        response = gemini_client.models.generate_content(
-            model='gemini-2.5-pro',
-            contents=prompt
-        )
-        print(f"  Gemini response: {response.text.strip()}")
-        classification = response.text.strip().lower()
-
-        if classification == "systemic":
-            return "pos"  # 'pos' for systemic stress
-        elif classification == "cellular":
-            return "neg"  # 'neg' for cellular stress
-        else:
-            print(f"Warning: Gemini returned unexpected classification: '{classification}' for sentence: '{sentence_text}'")
-            return "unknown"
-
-    except Exception as e:
-        print(f"Error calling Gemini API for stress classification: {e}")
-        return "error_api_call"
-'''
-
 # Sqlite database
 class users(db.Model):
     __tablename__='user'
@@ -253,44 +161,6 @@ class users(db.Model):
     password = db.Column(db.String(128), nullable=False)
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
 
-# Preprocessing of words for CNN (REMOVED)
-# def clean_doc(doc, vocab):
-#     doc = doc.lower()
-#     tokens = doc.split()
-#     re_punc = re.compile('[%s]' % re.escape(string.punctuation))
-#     tokens = [re_punc.sub('' , w) for w in tokens]
-#     tokens = [word for word in tokens if len(word) > 1]
-#     stop_words = set(stopwords.words('english'))
-#     tokens = [w for w in tokens if not w in stop_words]
-#     porter = PorterStemmer()
-#     stemmed = [porter.stem(word) for word in tokens]
-#     return tokens
-
-# Load tokenizer (REMOVED)
-# with open('./nlp/tokenizer.pickle', 'rb') as handle:
-#     tokenizer = pickle.load(handle)
-
-# Load vocabulary (REMOVED)
-# with open('./nlp/vocabulary.txt', 'r') as vocab_file_handle: # Renamed variable to avoid conflict
-#     vocab_text = vocab_file_handle.read() # Renamed variable
-
-# def tf_auc_score(y_true, y_pred): (REMOVED)
-#     return tensorflow.metrics.AUC()(y_true, y_pred)
-
-# K.clear_session() (REMOVED)
-
-# Create the CNN model (REMOVED)
-# def create_model(vocab_size, max_length):
-#     model = Sequential()
-#     model.add(Embedding(vocab_size, 32, input_length=max_length))
-#     model.add(Conv1D(filters=16, kernel_size=4, activation='relu'))
-#     model.add(MaxPooling1D(pool_size=2))
-#     model.add(Flatten())
-#     model.add(Dense(10, activation='relu'))
-#     model.add(Dense(1, activation='sigmoid'))
-#     opt = tensorflow.keras.optimizers.Adamax(learning_rate=0.002, beta_1=0.9, beta_2=0.999)
-#     model.compile(loss='binary_crossentropy', optimizer=opt, metrics=[tf_auc_score])
-#     return model
 
 # Use addiction ontology by default
 import ast # Moved import ast here as it's first used here.
@@ -1640,7 +1510,6 @@ def sentences():
                 # Create the batched prompt
                 sentences_to_classify_str = ""
                 for i, s_obj in enumerate(all_stress_sentences):
-                    # Use a unique, parsable identifier for each sentence
                     sentences_to_classify_str += f'Sentence {i}: "{s_obj["raw_text"]}"\n'
 
                 batched_prompt = f"""For each sentence below, classify it as describing "Cellular Stress" or "Organismal Stress".
@@ -1651,18 +1520,38 @@ Example format: {{"0": "Cellular Stress", "1": "Organismal Stress"}}
 Here are the sentences to classify:
 {sentences_to_classify_str}
 """
-                # Call the API using the new Client
-                print(f"Gemini API call: batch stress classification (gemini-3-flash-preview)\n  Prompt: {batched_prompt}")
-                response = gemini_client.models.generate_content(
-                    model='gemini-3-flash-preview',
-                    contents=batched_prompt
-                )
-                print(f"  Gemini response: {response.text.strip()}")
-
-                # Step 3: Parse the JSON response
-                # The model might wrap the JSON in ```json ... ```, so we need to clean it.
-                cleaned_response_text = response.text.strip().replace("```json", "").replace("```", "").strip()
-                classifications = json.loads(cleaned_response_text)
+                # Check cache (keyed on the batch of sentences)
+                import hashlib
+                batch_cache_key = hashlib.sha256(sentences_to_classify_str.encode()).hexdigest()
+                if batch_cache_key in _gemini_cache:
+                    print(f"  Gemini batch cache hit ({len(all_stress_sentences)} sentences)")
+                    classifications = _gemini_cache[batch_cache_key]
+                else:
+                    # Call API with retry
+                    import time as _time
+                    last_error = None
+                    classifications = None
+                    for attempt in range(3):
+                        try:
+                            if attempt > 0:
+                                _time.sleep(2 * attempt)
+                                print(f"  Gemini batch retry {attempt + 1}/3")
+                            print(f"Gemini API call: batch stress classification (gemini-3-flash-preview)\n  Prompt: {batched_prompt}")
+                            response = gemini_client.models.generate_content(
+                                model='gemini-3-flash-preview',
+                                contents=batched_prompt
+                            )
+                            print(f"  Gemini response: {response.text.strip()}")
+                            cleaned_response_text = response.text.strip().replace("```json", "").replace("```", "").strip()
+                            classifications = json.loads(cleaned_response_text)
+                            # Cache on success
+                            _gemini_cache[batch_cache_key] = classifications
+                            break
+                        except Exception as retry_e:
+                            last_error = retry_e
+                            print(f"  Gemini batch attempt {attempt + 1}/3 failed: {retry_e}")
+                    if classifications is None:
+                        raise Exception(f"Gemini batch failed after 3 attempts: {last_error}")
 
                 # Step 4: Distribute the sentences into buckets based on the parsed classifications
                 for i, s_obj in enumerate(all_stress_sentences):
