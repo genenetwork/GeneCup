@@ -1,5 +1,6 @@
 #!/bin/env python3
 from nltk.tokenize import sent_tokenize
+import hashlib
 import os
 import re
 
@@ -8,6 +9,25 @@ from gene_synonyms import *
 import ast
 
 global pubmed_path
+
+# In-memory cache for esearch results: hash(query) -> list of PMIDs
+_esearch_cache = {}
+
+def esearch_pmids(query):
+    """Search PubMed for PMIDs matching query. Results are cached in memory.
+
+    Returns a list of PMID strings, or [] if none found.
+    """
+    key = hashlib.sha256(query.encode()).hexdigest()
+    if key in _esearch_cache:
+        print(f"  esearch cache hit for: {query}")
+        return _esearch_cache[key]
+    pmid_cmd = "esearch -db pubmed -query " + query + " | efetch -format uid"
+    print(f"  popen: {pmid_cmd}")
+    pmids = os.popen(pmid_cmd).read().strip()
+    pmid_list = [p for p in pmids.split("\n") if p.strip()] if pmids else []
+    _esearch_cache[key] = pmid_list
+    return pmid_list
 
 def undic(dic):
     all_s=''
@@ -62,14 +82,11 @@ def getabstracts(gene,query):
     """
 
     query="\"(" + query + ") AND (" + gene + " [tiab])\""
-    # Step 1: fetch PMIDs from PubMed
-    pmid_cmd = "esearch -db pubmed -query " + query + " | efetch -format uid"
-    print(f"  popen: {pmid_cmd}")
-    pmids = os.popen(pmid_cmd).read().strip()
-    if not pmids:
+    # Step 1: fetch PMIDs from PubMed (cached)
+    pmid_list = esearch_pmids(query)
+    if not pmid_list:
         print(f"  no PMIDs found for {gene}")
         return ""
-    pmid_list = pmids.split("\n")
     print(f"  PMIDs ({len(pmid_list)}): {' '.join(pmid_list)}")
     # Step 2: fetch abstracts via hybrid local+NCBI
     abstracts = hybrid_fetch_abstracts(pmid_list)
