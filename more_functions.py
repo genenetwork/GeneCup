@@ -25,8 +25,8 @@ def getabstracts(gene,query):
     """
       1. esearch -db pubmed -query ... -- searches PubMed for the gene + keyword query, returns matching record IDs
       2. efetch -format uid -- fetches just the PMIDs (unique identifiers) from the search results
-      3. fetch-pubmed -path <pubmed_path> -- looks up those PMIDs in the local PubMed mirror (avoids hitting NCBI servers
-         for the full abstracts)
+      3. look up PMIDs in the local PubMed mirror archive (avoids hitting NCBI servers
+         for the full abstracts) -- archive stores gzipped XML by PMID path
       4. xtract -pattern PubmedArticle -element MedlineCitation/PMID,ArticleTitle,AbstractText -- extracts PMID, title, and
          abstract text from the XML into tab-separated fields
       5. sed "s/-/ /g" -- replaces hyphens with spaces (so hyphenated gene names match keyword searches later)
@@ -45,7 +45,16 @@ def getabstracts(gene,query):
     pmid_list = pmids.split("\n")
     print(f"  PMIDs ({len(pmid_list)}): {' '.join(pmid_list)}")
     # Step 2: fetch abstracts from local mirror
-    abs_cmd = "echo '" + pmids.replace("'", "") + "' | fetch-pubmed -path " + pubmed_path \
+    # fetch-pubmed is not shipped with edirect 25.x, so we look up
+    # the archive files directly: PMID 30990365 -> 30/99/03/30990365.xml.gz
+    fetch_script = (
+        "for uid in " + pmids.replace("\n", " ").replace("'", "") + "; do "
+        "p=$(printf '%.2s/%.2s/%.2s' \"$uid\" \"${uid#??}\" \"${uid#????}\"); "
+        "f=" + pubmed_path + "/Archive/${p}/${uid}.xml.gz; "
+        "[ -f \"$f\" ] && zcat \"$f\"; "
+        "done"
+    )
+    abs_cmd = fetch_script \
         + " | xtract -pattern PubmedArticle -element MedlineCitation/PMID,ArticleTitle,AbstractText | sed \"s/-/ /g\""
     print(f"  popen: {abs_cmd}")
     abstracts = os.popen(abs_cmd).read()
