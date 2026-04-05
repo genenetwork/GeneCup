@@ -140,14 +140,7 @@ else:
         print(f"Error initializing Gemini API client: {e}")
         GEMINI_API_KEY = None
 
-STRESS_PROMPT_TEMPLATE = ""
-try:
-    with open("stress_prompt.txt", "r") as f_prompt:
-        STRESS_PROMPT_TEMPLATE = f_prompt.read()
-except FileNotFoundError:
-    print("FATAL ERROR: stress_prompt.txt not found. Stress classification will fail.")
-except Exception as e:
-    print(f"FATAL ERROR: Could not read stress_prompt.txt: {e}")
+STRESS_PROMPT_TEMPLATE = "" # unused: batch classifier builds its own prompt
 
 # In-memory cache for Gemini stress classification: hash(sentence) -> result
 _gemini_cache = {}
