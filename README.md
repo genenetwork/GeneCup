@@ -45,19 +45,19 @@ Following the instruction provided by NCBI: https://www.nlm.nih.gov/dataguide/ed
 Point environment variables to this dir and run in the local source tree:
 
 ```
-env EDIRECT_PUBMED_MASTER=/export/PubMed `guix build -L . genecup-gemini`/bin/genecup --port 4201
+env EDIRECT_PUBMED_ARCHIVE=/export/PubMed `guix build -L . genecup-gemini`/bin/genecup --port 4201
 ```
 
 You can run from a proper container:
 
 ```
-guix shell -L . -C -N -F genecup-gemini -- genecup --port 4201
+guix shell -L ~/guix-bioinformatics -L . -C -N -F genecup-gemini -- genecup --port 4201
 ```
 
 Environment variables used:
 
 ```
-EDIRECT_PUBMED_MASTER: PubMed datadir (defaults to built-in minipubmed)
+EDIRECT_PUBMED_ARCHIVE: PubMed datadir (defaults to built-in minipubmed)
 GENECUP_DATADIR: SQLITE DB directory (default .)
 NLTK_DATA: punkt_tab directory (defaults to built-in nltk-punkt)
 TMPDIR (default /tmp)
