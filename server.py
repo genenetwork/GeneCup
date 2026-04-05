@@ -174,33 +174,39 @@ def classify_stress_with_gemini(sentence_text):
         print("Stress prompt template is not available. Skipping classification.")
         return "error_no_prompt_template"
 
-    try:
-        # Call the API using the new Client
-        prompt_text = STRESS_PROMPT_TEMPLATE + f'\nSentence: {sentence_text}\nClassification:'
-        print(f"Gemini API call: few-shot stress classification (gemini-2.5-pro)\n  Prompt: {prompt_text}")
-        response = gemini_client.models.generate_content(
-            model='gemini-2.5-pro',
-            contents=prompt_text
-        )
-        print(f"  Gemini response: {response.text.strip()}")
-        # We need to parse the classification from the response
-        classification = response.text.strip().lower()
+    import time
+    prompt_text = STRESS_PROMPT_TEMPLATE + f'\nSentence: {sentence_text}\nClassification:'
+    last_error = None
+    for attempt in range(3):
+        try:
+            if attempt > 0:
+                time.sleep(2 * attempt)
+                print(f"  Gemini retry {attempt + 1}/3")
+            print(f"Gemini API call: few-shot stress classification (gemini-2.5-pro)\n  Prompt: {prompt_text}")
+            response = gemini_client.models.generate_content(
+                model='gemini-2.5-pro',
+                contents=prompt_text
+            )
+            print(f"  Gemini response: {response.text.strip()}")
+            classification = response.text.strip().lower()
 
-        # The model might return "Cellular Level Stress" or "Organismal Stress"
-        if "cellular" in classification:
-            result = "neg"  # 'neg' for Cellular Level Stress
-        elif "organismal" in classification:
-            result = "pos"  # 'pos' for Organismal Stress
-        else:
-            print(f"Warning: Gemini returned unexpected classification: '{classification}' for sentence: '{sentence_text}'")
-            result = "unknown"
-        if result in ("pos", "neg"):
-            _gemini_cache[cache_key] = result
-        return result
+            if "cellular" in classification:
+                result = "neg"  # 'neg' for Cellular Level Stress
+            elif "organismal" in classification:
+                result = "pos"  # 'pos' for Organismal Stress
+            else:
+                print(f"Warning: Gemini returned unexpected classification: '{classification}' for sentence: '{sentence_text}'")
+                result = "unknown"
+            if result in ("pos", "neg"):
+                _gemini_cache[cache_key] = result
+            return result
 
-    except Exception as e:
-        print(f"Error calling Gemini API for stress classification: {e}")
-        return "error_api_call"
+        except Exception as e:
+            last_error = e
+            print(f"Error calling Gemini API (attempt {attempt + 1}/3): {e}")
+
+    print(f"Gemini API failed after 3 attempts: {last_error}")
+    return "error_api_call"
 
 
 # zero-shot Function to classify stress using Gemini API
