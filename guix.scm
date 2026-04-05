@@ -333,7 +333,7 @@ access to Gemini models.")
     (build-system python-build-system)
     (arguments
      (list
-      #:tests? #f ; no test suite
+      #:tests? #t
       #:phases
       #~(modify-phases %standard-phases
           (delete 'configure)
@@ -362,6 +362,9 @@ access to Gemini models.")
                 ;; Patch default pubmed path to store location
                 (substitute* "more_functions.py"
                   (("\\./minipubmed") pubmed)))))
+          (replace 'check
+            (lambda _
+              (invoke "python" "-m" "unittest" "discover" "-s" "tests" "-v")))
           (replace 'install
             (lambda* (#:key outputs #:allow-other-keys)
               (let ((out (assoc-ref outputs "out")))
