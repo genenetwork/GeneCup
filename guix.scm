@@ -364,7 +364,8 @@ access to Gemini models.")
                   (("\\./minipubmed") pubmed)))))
           (replace 'check
             (lambda _
-              (invoke "python" "-m" "unittest" "discover" "-s" "tests" "-v")))
+              ;; test_network_* files need internet, skip them
+              (invoke "python" "-m" "unittest" "tests.test_hello" "-v")))
           (replace 'install
             (lambda* (#:key outputs #:allow-other-keys)
               (let ((out (assoc-ref outputs "out")))
