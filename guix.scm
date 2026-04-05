@@ -12,6 +12,7 @@
 ;; In a shell you can run
 ;;
 ;;   python3 -m unittest tests.test_network_esearch
+;;   env EDIRECT_LOCAL_ARCHIVE=/export3/PubMed/Source python3 -m unittest tests.test_local_xfetch -v
 ;;
 ;; Note: API key is read from ~/.config/gemini/credentials
 ;;
