@@ -116,8 +116,8 @@ detection tokenizer (tab format), used by NLTK's sent_tokenize function.")
                                         "/share/minipubmed")))
                 ;; Generate test.xml from pmid.list
                 (with-directory-excursion "minipubmed"
-                  ;; Generate test.xml by looking up PMIDs in the local archive
-                  (system "for uid in $(cat pmid.list); do p=$(printf '%.2s/%.2s/%.2s' \"$uid\" \"${uid#??}\" \"${uid#????}\"); f=PubMed/Archive/${p}/${uid}.xml.gz; [ -f \"$f\" ] && zcat \"$f\"; done > test.xml"))
+                  ;; Generate test.xml from pmid.list using xfetch
+                  (system "cat pmid.list | xfetch -db pubmed > test.xml"))
                 (mkdir-p out)
                 (copy-recursively "minipubmed" out)))))))
     (inputs (list edirect-25))
