@@ -1506,12 +1506,27 @@ def sentences():
         if not GEMINI_API_KEY:
             print("Gemini API key not configured. Skipping batch classification.")
         else:
-            try:
-                # Create the batched prompt
-                sentences_to_classify_str = ""
-                for i, s_obj in enumerate(all_stress_sentences):
-                    sentences_to_classify_str += f'Sentence {i}: "{s_obj["raw_text"]}"\n'
+            # Build cache key early to check if we need the loading page
+            sentences_to_classify_str = ""
+            for i, s_obj in enumerate(all_stress_sentences):
+                sentences_to_classify_str += f'Sentence {i}: "{s_obj["raw_text"]}"\n'
+            import hashlib
+            batch_cache_key = hashlib.sha256(sentences_to_classify_str.encode()).hexdigest()
 
+            # Show loading page if not cached and not yet asked to classify
+            if batch_cache_key not in _gemini_cache and not request.args.get('classify'):
+                loading_url = request.url + ('&' if '?' in request.url else '?') + 'classify=1'
+                return f'''<!doctype html>
+<html><head>
+<meta http-equiv="refresh" content="1; url={loading_url}">
+<style>body {{ font-family: sans-serif; text-align: center; margin-top: 100px; }}</style>
+</head><body>
+<h2>Calling Gemini API...</h2>
+<p>Classifying {len(all_stress_sentences)} sentences as cellular/organismal stress.</p>
+<p>Please wait, this page will refresh automatically.</p>
+</body></html>'''
+
+            try:
                 batched_prompt = f"""For each sentence below, classify it as describing "Cellular Stress" or "Organismal Stress".
 Return your response as a valid JSON object where keys are the sentence numbers (e.g., "0", "1", "2") and values are the classification ("Cellular Stress" or "Organismal Stress").
 
@@ -1520,9 +1535,6 @@ Example format: {{"0": "Cellular Stress", "1": "Organismal Stress"}}
 Here are the sentences to classify:
 {sentences_to_classify_str}
 """
-                # Check cache (keyed on the batch of sentences)
-                import hashlib
-                batch_cache_key = hashlib.sha256(sentences_to_classify_str.encode()).hexdigest()
                 if batch_cache_key in _gemini_cache:
                     print(f"  Gemini batch cache hit ({len(all_stress_sentences)} sentences)")
                     classifications = _gemini_cache[batch_cache_key]
