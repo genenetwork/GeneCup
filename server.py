@@ -346,6 +346,33 @@ def logout():
 def about():
     return render_template('about.html',version=version())
 
+@app.route("/create-ontology", methods=["GET", "POST"])
+def create_ontology():
+    from more_functions import gemini_query
+    default_prompt = (
+        "Give me a list of terms on substance abuse disorder (SUD) that act "
+        "as traits and classifiers in scientific literature with a focus on "
+        "behaviour and brain attributes related to the hippocampus. Avoid "
+        "aliases and synonyms as well as gene names. Each term should be "
+        "1-3 words (max). Give me a list of at least 20, but no more than "
+        "80, most used terms. Return only the terms, one per line, no "
+        "numbering. Add abbreviations and aliases as a list with each term, "
+        "separated by commas")
+    if request.method == "POST":
+        prompt = request.form.get("prompt", default_prompt)
+        try:
+            result = gemini_query(prompt)
+            terms = [t.strip() for t in result.strip().split("\n") if t.strip()]
+            return render_template('create-ontology.html',
+                                   prompt=prompt, result=result,
+                                   count=len(terms), version=version())
+        except Exception as e:
+            return render_template('create-ontology.html',
+                                   prompt=prompt, result=f"Error: {e}",
+                                   count=0, version=version())
+    return render_template('create-ontology.html',
+                           prompt=default_prompt, result=None,
+                           count=0, version=version())
 
 # Ontology selection
 @app.route("/index_ontology", methods=["POST", "GET"])

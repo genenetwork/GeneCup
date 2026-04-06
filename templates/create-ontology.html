@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="container mt-4">
+  <h3>Create Ontology with Gemini AI</h3>
+
+  <form method="POST" action="/create-ontology">
+    <div class="form-group">
+      <label for="prompt">Prompt:</label>
+      <textarea class="form-control" id="prompt" name="prompt" rows="6">{{ prompt }}</textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Create Ontology</button>
+  </form>
+
+  {% if result %}
+  <div class="form-group mt-4">
+    <label for="result">Result ({{ count }} terms):</label>
+    <textarea class="form-control" id="result" rows="20" readonly>{{ result }}</textarea>
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}
