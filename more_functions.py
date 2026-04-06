@@ -113,6 +113,22 @@ def hybrid_fetch_abstracts(pmid_list):
         abstracts += extra
     return abstracts
 
+def getabstracts_batch(genes, query):
+    """Fetch abstracts for multiple genes in a single PubMed query.
+
+    Builds: (keywords) AND (gene1 [tiab] OR gene2 [tiab] OR ...)
+    Returns tab-separated lines: PMID, ArticleTitle, AbstractText
+    """
+    genes_clause = " OR ".join(g + " [tiab]" for g in genes)
+    full_query = "\"(" + query + ") AND (" + genes_clause + ")\""
+    pmid_list = esearch_pmids(full_query)
+    if not pmid_list:
+        print(f"  no PMIDs found for {genes}")
+        return ""
+    print(f"  PMIDs ({len(pmid_list)}): {' '.join(pmid_list[:20])}{'...' if len(pmid_list) > 20 else ''}")
+    abstracts = hybrid_fetch_abstracts(pmid_list)
+    return abstracts
+
 def getabstracts(gene,query):
     """
       1. esearch -db pubmed -query ... -- searches PubMed for the gene + keyword query, returns matching record IDs

@@ -64,7 +64,7 @@ import re
 import ast
 from more_functions import *
 from nltk.tokenize import sent_tokenize
-from more_functions import getabstracts, undic, gene_category
+from more_functions import getabstracts, getabstracts_batch, undic, gene_category
 
 GENECUP_PROMPT_TEMPLATE = ""
 try:
@@ -983,22 +983,25 @@ def search():
             progress+=percent
             yield "data:"+str(progress)+"\n\n"
 
-            for gene in genes:
-                print(f"Fetching info for gene {gene}\n")
-                abstracts_raw = getabstracts(gene,all_d) # all_d might be empty if no search_type matches
-                print(abstracts_raw)
-                sentences_ls=[]
+            # Batch fetch all abstracts in a single PubMed query
+            print(f"Batch fetching abstracts for {len(genes)} genes")
+            all_abstracts_raw = getabstracts_batch(genes, all_d) if all_d else ""
+            # Parse all sentences once
+            all_sentences = []
+            for row in all_abstracts_raw.split("\n"):
+                if not row.strip(): continue
+                tiab = row.split("\t")
+                pmid = tiab.pop(0)
+                tiab_text = " ".join(tiab)
+                for sent_tok in sent_tokenize(tiab_text):
+                    all_sentences.append(pmid + ' ' + sent_tok)
 
-                for row in abstracts_raw.split("\n"):
-                    if not row.strip(): continue # Skip empty lines
-                    tiab=row.split("\t")
-                    pmid = tiab.pop(0)
-                    tiab_text = " ".join(tiab) # Renamed to avoid conflict
-                    sentences_tok = sent_tokenize(tiab_text)
-                    for sent_tok in sentences_tok:
-                        sent_tok = pmid + ' ' + sent_tok
-                        sentences_ls.append(sent_tok)
-                gene=gene.replace("-"," ")
+            for gene in genes:
+                gene = gene.replace("-", " ")
+                # Filter sentences that mention this gene
+                gene_re = re.compile(r'\b' + re.escape(gene) + r'\b', re.IGNORECASE)
+                sentences_ls = [s for s in all_sentences if gene_re.search(s)]
+                print(f"  Gene {gene}: {len(sentences_ls)} sentences")
 
                 geneEdges = ""
 
