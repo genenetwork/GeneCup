@@ -286,7 +286,7 @@ GeneCup with four gene symbols (gria1, crhr1, drd2, and penk).")
            go-github-com-surgebase-porter2
            go-golang-org-x-sys
            go-golang-org-x-text))
-    (propagated-inputs (list curl wget grep sed gawk coreutils findutils gzip unzip))
+    (propagated-inputs (list curl wget grep sed gawk coreutils findutils gzip unzip xargs))
     (inputs (list bash-minimal coreutils perl perl-xml-simple python))
     (home-page "https://www.ncbi.nlm.nih.gov/books/NBK179288/")
     (synopsis "Tools for accessing the NCBI's set of databases")
