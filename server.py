@@ -359,6 +359,38 @@ def create_ontology():
         "numbering. Add abbreviations and aliases as a list with each term, "
         "separated by commas")
     if request.method == "POST":
+        action = request.form.get("action", "generate")
+
+        if action == "search":
+            # Build a temporary .onto file from the result terms and redirect to /progress
+            result_text = request.form.get("result", "")
+            query = request.form.get("query", "")
+            search_types = request.form.getlist("type")
+            # Build onto dict: each term is its own category with aliases as pipe-separated keywords
+            dict_onto = {}
+            for line in result_text.strip().split("\n"):
+                line = line.strip()
+                if not line:
+                    continue
+                parts = [p.strip() for p in line.split(",")]
+                category = parts[0]
+                keywords = "|".join(parts)
+                dict_onto[category] = {category: {keywords}}
+            # Save to a temp .onto file
+            onto_path = os.path.join(tempfile.gettempdir(), "gemini_ontology")
+            with open(onto_path + ".onto", "w") as f:
+                f.write(repr(dict_onto))
+            session['namecat'] = onto_path
+            print(f"  Created ontology: {onto_path}.onto with {len(dict_onto)} categories")
+            print(f"  Gene query: '{query}', search_types: {search_types}")
+            # Build the redirect URL with type and query params
+            from urllib.parse import urlencode
+            params = [("query", query)]
+            for t in search_types:
+                params.append(("type", t))
+            return redirect("/progress?" + urlencode(params))
+
+        # action == "generate"
         prompt = request.form.get("prompt", default_prompt)
         try:
             result = gemini_query(prompt)
@@ -830,6 +862,11 @@ def progress():
         if (search_type == []):
             search_type = ['GWAS', 'function', 'addiction', 'drug', 'brain', 'stress', 'psychiatric', 'cell']
         session['search_type'] = search_type
+        # Use default addiction ontology unless redirected from /create-ontology
+        if request.referrer and '/create-ontology' in request.referrer:
+            pass  # keep session['namecat'] set by /create-ontology
+        elif 'namecat' in session:
+            del session['namecat']
     genes_session = ''
 
     for gen in genes:
@@ -873,8 +910,10 @@ def search():
     if 'namecat' in session:
         namecat_flag=1
         ses_namecat = session['namecat']
+        print(f"  /search: namecat={ses_namecat}, search_type={search_type}")
         onto_cont = open(session['namecat']+".onto","r").read()
         dict_onto=ast.literal_eval(onto_cont)
+        print(f"  /search: onto categories={list(dict_onto.keys())[:10]}")
 
         for ky in dict_onto.keys():
             nodecolor[ky] = "hsl("+str((n_num+1)*int(360/len(dict_onto.keys())))+", 70%, 80%)"
@@ -935,6 +974,7 @@ def search():
                     all_d = all_d+'|'+all_d_ls
             if all_d: # Check if all_d is not empty
                 all_d=all_d[1:]
+            print(f"  /search generate: all_d={all_d[:200] if all_d else '(empty)'}, search_type={search_type}")
 
             if ("GWAS" in search_type):
                 datf = pd.read_csv('./utility/gwas_used.csv',sep='\t')

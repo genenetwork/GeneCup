@@ -5,6 +5,7 @@
   <h3>Create Ontology with Gemini AI</h3>
 
   <form method="POST" action="/create-ontology">
+    <input type="hidden" name="action" value="generate">
     <div class="form-group">
       <label for="prompt">Prompt:</label>
       <textarea class="form-control" id="prompt" name="prompt" rows="6">{{ prompt }}</textarea>
@@ -15,8 +16,32 @@
   {% if result %}
   <div class="form-group mt-4">
     <label for="result">Result ({{ count }} terms):</label>
-    <textarea class="form-control" id="result" rows="20" readonly>{{ result }}</textarea>
+    <textarea class="form-control" id="result" name="result" rows="20" form="search-form">{{ result }}</textarea>
   </div>
+
+  <form id="search-form" method="POST" action="/create-ontology" class="mt-3">
+    <input type="hidden" name="action" value="search">
+    <div class="form-group">
+      <label for="query">Gene symbols (space or comma separated):</label>
+      <textarea class="form-control" id="query" name="query" rows="2"></textarea>
+    </div>
+    <div id="check_selection_onto"></div>
+    <button type="submit" class="btn btn-primary">Search</button>
+  </form>
+
+  <script>
+    var lines = document.getElementById('result').value.split('\n');
+    var checkbox = '';
+    for (var i = 0; i < lines.length; i++) {
+      var term = lines[i].trim();
+      if (term) {
+        var label = term.split(',')[0].trim();
+        checkbox += '<strong><input type="checkbox" name="type" value="' + label + '" checked form="search-form"> ' + label + '&nbsp;&nbsp;</strong>';
+      }
+    }
+    checkbox += '<br><strong><input type="checkbox" onClick="var c=document.querySelectorAll(\'input[name=type]\');for(var i=0;i<c.length;i++)c[i].checked=this.checked;"/> (Un)select all</strong>';
+    document.getElementById('check_selection_onto').innerHTML = checkbox;
+  </script>
   {% endif %}
 </div>
 
