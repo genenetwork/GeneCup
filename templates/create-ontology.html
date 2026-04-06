@@ -10,7 +10,7 @@
       <label for="prompt">Prompt:</label>
       <textarea class="form-control" id="prompt" name="prompt" rows="6">{{ prompt }}</textarea>
     </div>
-    <button type="submit" class="btn btn-primary">Create Ontology</button>
+    <button type="submit" class="btn btn-primary" onclick="this.style.backgroundColor='#87CEEB'; this.style.borderColor='#87CEEB';">Create Ontology</button>
   </form>
 
   {% if result %}
@@ -26,7 +26,7 @@
       <textarea class="form-control" id="query" name="query" rows="2"></textarea>
     </div>
     <div id="check_selection_onto"></div>
-    <button type="submit" class="btn btn-primary">Search</button>
+    <button type="submit" class="btn btn-primary" onclick="if(!document.getElementById('query').value.trim()){alert('Please enter at least one gene symbol');return false;}">Search</button>
   </form>
 
   <script>
