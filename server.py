@@ -348,6 +348,8 @@ def about():
 
 @app.route("/create-ontology", methods=["GET", "POST"])
 def create_ontology():
+    if request.method == "GET":
+        session.pop('namecat', None)
     from more_functions import gemini_query
     default_prompt = (
         "Give me a list of terms on substance abuse disorder (SUD) that act "
@@ -356,7 +358,7 @@ def create_ontology():
         "aliases and synonyms as well as gene names. Each term should be "
         "1-3 words (max). Give me a list of at least 20, but no more than "
         "80, most used terms. Return only the terms, one per line, no "
-        "numbering. Add abbreviations and aliases as a list with each term, "
+        "numbering. Add abbreviations and aliases - each at least 3 letters that have no other meaning - as a list with each term, "
         "separated by commas")
     if request.method == "POST":
         action = request.form.get("action", "generate")
