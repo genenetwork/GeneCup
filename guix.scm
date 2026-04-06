@@ -7,12 +7,14 @@
 ;;
 ;; Development shell:
 ;;
-;;   guix shell -L . -C -N -F edirect-25 genecup-gemini coreutils -- genecup --port 4201
+;;   guix shell -L . -C -N -F --expose=$HOME/.config/gemini --share=/export3/PubMed edirect-25 genecup-gemini coreutils -- genecup --port 4201
 ;;
 ;; In a shell you can run
 ;;
-;;   python3 -m unittest tests.test_network_esearch
+;;   guix shell -C -N -F -L . --expose=$HOME/.config/gemini --share=/export3/PubMed edirect-25 genecup-gemini
+;;   env EDIRECT_LOCAL_ARCHIVE=/export3/PubMed/Source python3 -m unittest tests.test_network_esearch
 ;;   env EDIRECT_LOCAL_ARCHIVE=/export3/PubMed/Source python3 -m unittest tests.test_local_xfetch -v
+;;   env EDIRECT_LOCAL_ARCHIVE=/export3/PubMed/Source python3 -m unittest tests.test_network_gemini_ontology
 ;;
 ;; Note: API key is read from ~/.config/gemini/credentials
 ;;

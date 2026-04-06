@@ -3,6 +3,7 @@ from nltk.tokenize import sent_tokenize
 import hashlib
 import os
 import re
+import time
 
 from addiction_keywords import *
 from gene_synonyms import *
@@ -10,8 +11,51 @@ import ast
 
 global pubmed_path
 
-# In-memory cache for esearch results: hash(query) -> list of PMIDs
-_esearch_cache = {}
+# In-memory caches
+_esearch_cache = {}  # hash(query) -> list of PMIDs
+_gemini_query_cache = {}  # hash(prompt) -> response text
+
+def gemini_query(prompt, model='gemini-2.5-flash'):
+    """Send a prompt to the Gemini API with caching and retry.
+
+    Returns the response text, or raises on failure.
+    """
+    from google import genai
+
+    cache_key = hashlib.sha256(prompt.encode()).hexdigest()
+    if cache_key in _gemini_query_cache:
+        print(f"  Gemini query cache hit")
+        return _gemini_query_cache[cache_key]
+
+    api_key = os.environ.get("GEMINI_API_KEY", "")
+    if not api_key:
+        cred_file = os.path.expanduser("~/.config/gemini/credentials")
+        if os.path.isfile(cred_file):
+            with open(cred_file) as f:
+                api_key = f.read().strip()
+    if not api_key:
+        raise RuntimeError("No Gemini API key found")
+
+    client = genai.Client(api_key=api_key)
+    last_error = None
+    for attempt in range(3):
+        try:
+            if attempt > 0:
+                time.sleep(2 * attempt)
+                print(f"  Gemini retry {attempt + 1}/3")
+            print(f"  Gemini API call ({model}): {prompt[:80]}...")
+            response = client.models.generate_content(
+                model=model,
+                contents=prompt
+            )
+            result = response.text.strip()
+            print(f"  Gemini response: {result[:200]}")
+            _gemini_query_cache[cache_key] = result
+            return result
+        except Exception as e:
+            last_error = e
+            print(f"  Gemini attempt {attempt + 1}/3 failed: {e}")
+    raise RuntimeError(f"Gemini API failed after 3 attempts: {last_error}")
 
 def esearch_pmids(query):
     """Search PubMed for PMIDs matching query. Results are cached in memory.
@@ -246,7 +290,7 @@ pubmed_path=os.environ.get("EDIRECT_LOCAL_ARCHIVE", "./minipubmed")
 print(f"  pubmed_path={pubmed_path}")
 
 if not os.path.isdir(pubmed_path):
-    print(f"ERROR: EDIRECT_LOCAL_ARCHIVE directory not found: {pubmed_path} - note this is a recent env variable that replaces the others")
+    print(f"ERROR: EDIRECT_LOCAL_ARCHIVE directory not found: {pubmed_path} - note this is a recent env variable that replaces the others (ignore the minipub reference)")
     raise SystemExit(1)
 testdir = os.path.join(pubmed_path, "pubmed", "Archive", "00")
 if not os.path.isdir(testdir):
